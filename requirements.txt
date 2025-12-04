@@ -1,0 +1,14 @@
+selenium==4.25.0
+webdriver-manager==4.0.2
+pandas==2.2.2
+openpyxl==3.1.5
+XlsxWriter==3.2.0
+
+# Logging & utilities
+python-dateutil==2.9.0.post0
+
+# For multiprocessing stability (already built-in but pinned for environments)
+psutil==6.0.0
+
+# Only if you use it in other parts of project
+numpy==2.1.2
