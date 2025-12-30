@@ -5,7 +5,7 @@ from datetime import datetime
 # --- FOLDERS / FILES ---
 CUMULATIVE_DIR = Path("cumulative_folder")   # folder where daily cumulative CSVs are dropped
 DELTA_OUT_DIR  = Path("delta_folder")       # folder where we store per-day delta CSV
-FINAL_FILE     = "final_master.xlsx"        # cumulative Excel
+FINAL_FILE     = "final_master.csv"        
 
 # --- KEYS (join keys) ---
 KEYS = ["RTO", "vehicle_type", "Maker"]
@@ -102,14 +102,9 @@ def compute_delta(old_df: pd.DataFrame, new_df: pd.DataFrame):
 
     old_g = old_df.groupby(KEYS, dropna=False)[old_numeric].sum(min_count=1).reset_index()
     new_g = new_df.groupby(KEYS, dropna=False)[new_numeric].sum(min_count=1).reset_index()
-
-    # Left join on NEW to keep latest rows as base
+    
     merged = pd.merge(new_g, old_g, on=KEYS, how="left", suffixes=("", "_old"))
-
-    # Start from exact NEW sheet; untouched non-numerics (timestamp/State/rto_number) remain as-is
     out_df = new_df.copy()
-
-    # Build composite keys for mapping deltas back
     merged["_k"] = merged[KEYS].astype(str).agg("§".join, axis=1)
     out_df["_k"] = out_df[KEYS].astype(str).agg("§".join, axis=1)
 
@@ -130,19 +125,18 @@ def compute_delta(old_df: pd.DataFrame, new_df: pd.DataFrame):
 
 def append_to_final(final_file: str, out_df: pd.DataFrame):
     """
-    Append out_df into FINAL_FILE (Excel), keeping columns aligned.
+    Append out_df into FINAL_FILE (CSV), keeping columns aligned.
     """
     final_path = Path(final_file)
 
     if final_path.exists():
-        final_df = pd.read_excel(final_path)
-
-        # Align headers (ensure consistent column order)
+        # Read the existing CSV master
+        final_df = pd.read_csv(final_path)
         missing_cols = [c for c in out_df.columns if c not in final_df.columns]
         for m in missing_cols:
             final_df[m] = pd.NA
 
-        # Add missing in the other direction (rare but safe)
+
         for m in final_df.columns:
             if m not in out_df.columns:
                 out_df[m] = pd.NA
@@ -156,15 +150,16 @@ def append_to_final(final_file: str, out_df: pd.DataFrame):
         # No file exists → create master with this delta
         final_df = out_df.copy()
 
-    final_df.to_excel(final_path, index=False)
+    # Persist as CSV (matches FINAL_FILE extension)
+    final_df.to_csv(final_path, index=False)
     print(f"Updated {final_file}  | total rows now = {len(final_df)}")
 
-
+from mail_protocol_service.mail_protocol import upload_and_email
 def main():
-    # Ensure delta output dir exists
+
     DELTA_OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    # --- pick files from cumulative_folder ---
+
     old_path, new_path = pick_old_and_new(CUMULATIVE_DIR)
 
     if old_path is None:
@@ -192,8 +187,11 @@ def main():
             f"Wrote {out_file}  | rows={len(out_df)}  | delta_cols={len(candidate_cols)}"
         )
 
-    # --- append to final master Excel ---
+
     append_to_final(FINAL_FILE, out_df)
+    upload_and_email(delta_csv_path=out_file,cumulative_csv_path=new_path,master_csv_path=FINAL_FILE, recipient_email ="sanjeevan@axtr.in,rauf@axtr.in,sanjeevanmanoranjan@gmail.com,alphaf.qcl@tatamotors.com,karthik.krishnan@tatamotors.com")
+
+    #--- append to final master Excel ---
 
 
 if __name__ == "__main__":

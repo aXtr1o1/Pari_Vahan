@@ -76,30 +76,6 @@ def restart_driver(state_name, download_dir, logger, headless=False):
     return driver, wait
 
 
-# START_DATE = datetime(2025, 12, 1)  # <-- set your project start date
-# EXPIRY_MONTHS = 32
-
-
-# def manager():
-#     expiry_date = START_DATE + timedelta(days=EXPIRY_MONTHS * 30)  # approx 24 months
-#     print(f"Project expiry date: {expiry_date}")
-#     now = datetime.now()
-#     print(f"Current date: {now}")
-#     if now < expiry_date:
-#         return False  # not expired
-
-#     project_root = os.path.dirname(os.path.abspath(__file__))
-#     forbidden_paths = ["C:\\", "C:\\Windows", "C:\\Users", "/", "/home", "/usr", "/etc"]
-#     if project_root in forbidden_paths or project_root == os.path.expanduser("~"):
-#         raise RuntimeError(f"🚨 Unsafe delete attempted at: {project_root}")
-
-#     try:
-#         print(f"⚠️ Project expired. Deleting directory: {project_root}")
-#         shutil.rmtree(project_root)
-#         return True
-#     except Exception as e:
-#         print(f"❌ Termination failed: {e}")
-#         return False
 
 def download_rename(rto_name, vehicle_type, download_dir, logger):
     """Download and rename the Excel file"""
@@ -198,17 +174,7 @@ def process_rto(driver, wait, visible_li, n, options_name, vehicle_type, downloa
         wait.until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="groupingTable:selectMonth_{m}"]'))).click()
         time.sleep(0.5)
 
-        #selecting LMV
-        # logger.info(f"selected LMV in options")
-        # wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="VhCatg"]/tbody/tr[12]/td/div/div[2]/span'))).click()
-        # time.sleep(0.5)
 
-        # #selecting LPV
-        # logger.info(f"selected LPV in options")
-        # wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="VhCatg"]/tbody/tr[13]/td/div/div[2]/span'))).click()
-        # time.sleep(0.5)
-
-        # if motorcab selecting Luxury Cab & Maxi Cab
 
         if vehicle_type=="motor_cab":
             wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="VhClass"]/tbody/tr[39]/td/label'))).click()
@@ -240,7 +206,8 @@ def process_rto(driver, wait, visible_li, n, options_name, vehicle_type, downloa
         return False
 
 
-def process_state(state_name, state_xpath, start_index=1):
+def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
+    """Process a state - will run until completion, no maximum retries"""
     logger = get_logger(
         name=f"STATE-{state_name}",
         filename=f"{final_folder}_{state_name}.log"
@@ -248,8 +215,10 @@ def process_state(state_name, state_xpath, start_index=1):
     logger.info(f"\n{'='*60}")
     logger.info(f"🚀 Starting process for {state_name}")
     logger.info(f"{'='*60}\n")
+    
     download_dir = os.path.join(os.path.expanduser("~"), "Downloads", f"{state_name}_temp")
     os.makedirs(download_dir, exist_ok=True)
+    
     chrome_options = Options()
     chrome_options.add_argument("--start-maximized")
     chrome_options.add_argument("--headless=new") 
@@ -259,9 +228,10 @@ def process_state(state_name, state_xpath, start_index=1):
     chrome_options.add_experimental_option("prefs", prefs)
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-    wait = WebDriverWait(driver, 25)  # type: ignore
+    wait = WebDriverWait(driver, 25)
 
     failed_rtos = []
+    state_success = False
 
     try:
         driver.get(URL)
@@ -301,10 +271,9 @@ def process_state(state_name, state_xpath, start_index=1):
             logger.info(f"{'='*50}")
 
             crash_restarts = 0
-            max_restarts = 10
             n = start_index
 
-            # While loop to allow restart/resume
+            # INFINITE LOOP - will keep retrying until all RTOs are processed
             while n < len(visible_li):
 
                 # Crash detection before each iteration
@@ -317,9 +286,7 @@ def process_state(state_name, state_xpath, start_index=1):
                         pass
 
                     crash_restarts += 1
-                    if crash_restarts > max_restarts:
-                        logger.critical("🛑 Maximum crash restarts reached. Aborting state.")
-                        break
+                    logger.info(f"🔄 Crash restart #{crash_restarts} - will keep trying...")
 
                     # Restart browser and re-initialize everything needed
                     driver, wait = restart_driver(state_name, download_dir, logger)
@@ -357,9 +324,10 @@ def process_state(state_name, state_xpath, start_index=1):
 
                         # Re-select month so subsequent process_rto calls use same month
                         try:
+                            m = datetime.now().month
                             wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="groupingTable:selectMonth"]/div[3]'))).click()
                             time.sleep(0.5)
-                            wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="groupingTable:selectMonth_12"]'))).click()
+                            wait.until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="groupingTable:selectMonth_{m}"]'))).click()
                             time.sleep(0.5)
                         except Exception:
                             # not fatal - process_rto will attempt again
@@ -367,13 +335,10 @@ def process_state(state_name, state_xpath, start_index=1):
 
                     except Exception as e:
                         logger.error(f"Failed to re-initialize after restart: {e}")
-
+                        time.sleep(15)  # Wait before next attempt
                         continue
-
-                    # After successful restart/resync, continue without incrementing n (retry same RTO)
                     continue
 
-                # Normal processing
                 try:
                     success = process_rto(driver, wait, visible_li, n, xpath, vehicle_type, download_dir, logger)
                     if not success:
@@ -391,24 +356,23 @@ def process_state(state_name, state_xpath, start_index=1):
                         pass
 
                     crash_restarts += 1
-                    if crash_restarts > max_restarts:
-                        logger.error("🛑 Too many restarts. Skipping state.")
-                        break
+                    logger.info(f"🔄 Exception restart #{crash_restarts} - will keep trying...")
 
                     driver, wait = restart_driver(state_name, download_dir, logger)
+                    time.sleep(5)
                     continue
 
+        # INFINITE RETRY LOOP for failed RTOs
         retry_count = 0
-        max_retries = 3
 
-        while failed_rtos and retry_count < max_retries:
+        while failed_rtos:
             retry_count += 1
-            logger.info(f"\n🔁 Retry attempt {retry_count}/{max_retries} for {state_name}")
+            logger.info(f"\n🔁 Retry attempt #{retry_count} for {state_name} - {len(failed_rtos)} RTOs remaining")
             still_failed = []
 
             if is_crashed(driver):
                 time.sleep(10)
-                logger.warning("Driver crashed before retry loop. Attempting single restart for retries.")
+                logger.warning("Driver crashed before retry loop. Restarting...")
                 try:
                     driver.quit()
                 except Exception:
@@ -416,6 +380,13 @@ def process_state(state_name, state_xpath, start_index=1):
                 driver, wait = restart_driver(state_name, download_dir, logger)
                 # re-populate visible_li
                 try:
+                    wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="filterLayout-toggler"]/span/a'))).click()
+                    time.sleep(1)
+                    wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="masterLayout_formlogin"]/div[2]/div/div/div[1]/div[2]/div[3]'))).click()
+                    time.sleep(1)
+                    wait.until(EC.element_to_be_clickable((By.XPATH, state_xpath))).click()
+                    time.sleep(2)
+                    
                     rto_dropdown = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="selectedRto"]/div[3]')))
                     rto_dropdown.click()
                     time.sleep(1)
@@ -426,32 +397,43 @@ def process_state(state_name, state_xpath, start_index=1):
                     visible_li = [li for li in all_li if li.is_displayed()]
                     rto_dropdown.click()
                     time.sleep(1)
-                except Exception:
-                    logger.warning("Could not repopulate visible_li for retries; continuing anyway.")
+                except Exception as e:
+                    logger.warning(f"Could not repopulate visible_li for retries: {e}")
+                    time.sleep(15)
+                    continue
 
             for n, vehicle_type, xpath in failed_rtos:
                 success = process_rto(driver, wait, visible_li, n, xpath, vehicle_type, download_dir, logger)
                 if not success:
                     still_failed.append((n, vehicle_type, xpath))
                 time.sleep(1)
-            logger.info(f"Retry attempt {retry_count} completed for {state_name}")
+            
             failed_rtos = still_failed
+            
+            if failed_rtos:
+                logger.info(f"Still have {len(failed_rtos)} failed RTOs, will keep retrying...")
+                time.sleep(10)  # Wait before next retry round
 
-        if failed_rtos:
-            logger.warning(f"\n⚠️ {state_name} completed with {len(failed_rtos)} failures:")
-            for n, vtype, _ in failed_rtos:
-                logger.warning(f"  - RTO {n} ({vtype})")
-        else:
-            logger.info(f"\n✅ {state_name} completed successfully!")
+        logger.info(f"\n✅ {state_name} completed successfully - ALL RTOs processed!")
+        state_success = True
 
     except Exception as e:
         logger.error(f"❌ Fatal error in {state_name}: {e}")
+        logger.info("Will report failure and let main() retry the entire state...")
+        state_success = False
 
     finally:
+        # Report status to shared dict if provided
+        if shared_dict is not None:
+            shared_dict[state_name] = state_success
+            logger.info(f"📊 Reported status for {state_name}: {state_success}")
+        
         try:
             driver.quit()
-        except Exception:
-            pass
+            logger.info(f"🔒 Browser closed for {state_name}")
+        except Exception as quit_err:
+            logger.warning(f"Error quitting driver: {quit_err}")
+            
 
         try:
             if os.path.exists(download_dir):
@@ -464,43 +446,87 @@ def process_state(state_name, state_xpath, start_index=1):
                 shutil.rmtree(download_dir)
         except Exception as e:
             logger.info(f"⚠️ Error cleaning up {state_name} temp directory: {e}")
+    
+    return state_success
 
 
 def main():
     logger = get_logger("MAIN", f"{final_folder}_main.log")
     logger.info(f"\n{'='*60}")
     logger.info(f"🚀 Starting Parallel RTO Data Collection")
-    # if manager():
-    #     return
     logger.info(f"Processing {len(STATES)} states simultaneously")
+    logger.info(f"⚠️  NO RETRY LIMITS - Will run until completion")
     logger.info(f"{'='*60}\n")
-    os.makedirs(FINAL_DIR, exist_ok=True)  # <-- single shared output folder
+    os.makedirs(FINAL_DIR, exist_ok=True)
 
     start_time = time.time()
+    
+    # Manager to track state success/failure
+    manager = Manager()
+    shared_dict = manager.dict()
+    
+    retry_attempt = 0
+    failed_states = []
+    
+    # INFINITE LOOP - will keep retrying failed states until all succeed
+    while True:
+        if retry_attempt > 0:
+            logger.info(f"\n{'='*60}")
+            logger.info(f"🔄 STATE RETRY ATTEMPT #{retry_attempt}")
+            logger.info(f"Retrying failed states: {list(failed_states)}")
+            logger.info(f"{'='*60}\n")
+        
+        states_to_process = STATES if retry_attempt == 0 else {k: v for k, v in STATES.items() if k in failed_states}
+        shared_dict.clear()
+        processes = []
+        for state_name, state_xpath in states_to_process.items():
+            logger.info(f"🚀 Starting process for state: {state_name}")
+            p = Process(target=process_state, args=(state_name, state_xpath, 1, shared_dict))
+            processes.append(p)
+            p.start()
+            time.sleep(2)
 
-    processes = []
-    for state_name, state_xpath in STATES.items():
-        p = Process(target=process_state, args=(state_name, state_xpath, 1))
-        processes.append(p)
-        p.start()
-        time.sleep(2)
-
-    for p in processes:
-        p.join()
+        for p in processes:
+            p.join()
+        logger.info(f"\n📊 All processes joined. Checking results...")
+        failed_states = []
+        for state_name in states_to_process.keys():
+            status = shared_dict.get(state_name, False)  # Default to False if not found
+            logger.info(f"State {state_name}: {'✅ SUCCESS' if status else '❌ FAILED'}")
+            if not status:
+                failed_states.append(state_name)
+        
+        if not failed_states:
+            logger.info(f"\n✅ All states completed successfully!")
+            break
+        
+        retry_attempt += 1
+        logger.warning(f"\n⚠️ {len(failed_states)} state(s) failed: {failed_states}")
+        logger.info(f"Retrying in 30 seconds...")
+        time.sleep(5)
+        
+        
 
     elapsed_time = time.time() - start_time
     logger.info(f"\n{'='*60}")
-    logger.info(f"🎉 All states completed!")
+    logger.info(f"🎉 ALL STATES COMPLETED SUCCESSFULLY!")
     logger.info(f"⏱️  Total time: {elapsed_time/60:.2f} minutes")
+    logger.info(f"📊 Total state retry attempts: {retry_attempt}")
     logger.info(f"{'='*60}\n")
-    from datetime import date
-    from preprocessing_services import consolidate_rto_files
-    from delta_data import main as delta_main
+    
+    # Run post-processing
+    try:
+        from datetime import date
+        from preprocessing_services import consolidate_rto_files
+        from delta_data import main as delta_main
 
-    INPUT_FOLDER = FINAL_DIR
-    OUTPUT_CSV = f"cumulative_folder/{date.today().strftime('%Y-%m-%d')}.csv"
-    consolidate_rto_files(INPUT_FOLDER, OUTPUT_CSV)
-    delta_main()
+        INPUT_FOLDER = FINAL_DIR
+        OUTPUT_CSV = f"cumulative_folder/{date.today().strftime('%Y-%m-%d')}.csv"
+        consolidate_rto_files(INPUT_FOLDER, OUTPUT_CSV)
+        delta_main()
+        logger.info("✅ Post-processing completed successfully")
+    except Exception as e:
+        logger.error(f"❌ Error during post-processing: {e}")
 
 
 if __name__ == "__main__":
