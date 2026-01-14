@@ -4,6 +4,8 @@ from pydrive2.drive import GoogleDrive
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 import dotenv
 from datetime import datetime, timedelta
 
@@ -129,20 +131,24 @@ def upload_csv_to_drive(
             obj.InsertPermission(permission)
 
     # ---------- response ----------
+    
     return {
         "scraped_root_link": f"https://drive.google.com/drive/folders/{scraped_root['id']}",
         "delta": {
             "path": f"scraped_data/delta/{delta_file['title']}",
             "link": f"https://drive.google.com/file/d/{delta_file['id']}/view",
         },
+
         "cumulative": {
             "path": f"scraped_data/cumulative/{cumulative_file['title']}",
             "link": f"https://drive.google.com/file/d/{cumulative_file['id']}/view",
         },
+
         "master": {
             "path": f"My Drive/{master_file['title']}",
             "link": f"https://drive.google.com/file/d/{master_file['id']}/view",
         },
+        
     }
 
 
@@ -151,13 +157,12 @@ def send_download_mail(
     download_link: str,
     filename: str,
     folder_link: str,
+    attachment_path: str | None = None,   # NEW
 ):
     smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
     smtp_port = int(os.getenv("SMTP_PORT", 587))
     smtp_user = "sanjeevan@axtr.in"
-    smtp_password ="axiomisyisrhgmld"
-    print("SMTP_USER:", smtp_user)
-    print("SMTP_PASSWORD:", smtp_password)
+    smtp_password = "axiomisyisrhgmld"
 
     if not smtp_user or not smtp_password:
         raise RuntimeError("SMTP credentials not set")
@@ -166,32 +171,49 @@ def send_download_mail(
     msg["From"] = smtp_user
     msg["To"] = to_email
     msg["Subject"] = f"Parivahan Delta Data - {scrape_date}"
+
     body = f"""
-<html>
-<body style="font-family: Arial, sans-serif; font-size: 14px; color: #000;">
-
-    <p>Team,</p>
-    <p>
-        PFA PariVahan Scraped Data For Today, <b>{scrape_date}</b>
-    </p>
-    <p><b>File Link: </b> <a href="{download_link}">{download_link}</a></p>
-    <p><b>Folder Link: </b> <a href="{folder_link}">{folder_link}</a></p>
-    <p><i>This is an automated mail.</i></p>
-
+    <html>
+    <body style="font-family: Arial, sans-serif; font-size: 14px; color: #000;">
+        <p>Team,</p>
+        <p>
+            PFA PariVahan Scraped Data For Today, <b>{scrape_date}</b>
+        </p>
+        <p><b>File Link:</b> <a href="{download_link}">{download_link}</a></p>
+        <p><b>Folder Link:</b> <a href="{folder_link}">{folder_link}</a></p>
+        <p><i>This is an automated mail.</i></p>
     </body>
     </html>
     """
 
     msg.attach(MIMEText(body, "html"))
 
+    # -------------------------
+    # ATTACH CSV FILE (NEW)
+    # -------------------------
+    if attachment_path and os.path.exists(attachment_path):
+        with open(attachment_path, "rb") as f:
+            part = MIMEBase("application", "octet-stream")
+            part.set_payload(f.read())
 
-    with smtplib.SMTP(smtp_host, smtp_port) as server:
-        server.starttls()
+        encoders.encode_base64(part)
+        part.add_header(
+            "Content-Disposition",
+            f'attachment; filename="{os.path.basename(attachment_path)}"'
+        )
+        msg.attach(part)
+
+    # with smtplib.SMTP(smtp_host, smtp_port) as server:
+    #     server.starttls()
+    #     server.login(smtp_user, smtp_password)
+    #     server.send_message(msg)
+
+    import smtplib
+    with smtplib.SMTP_SSL(smtp_host, smtp_port) as server:
         server.login(smtp_user, smtp_password)
         server.send_message(msg)
-
-
-
+Prepossessed_sheet_name = os.path.join(BASE_DIR, "master_preprocessed.csv")
+Prepossessed_sheet_name = "master_preprocessed.csv"
 def upload_and_email(
     delta_csv_path: str,
     cumulative_csv_path: str,
@@ -202,9 +224,10 @@ def upload_and_email(
 
     send_download_mail(
         to_email=recipient_email,
-        download_link=links["delta"]["link"],
+        download_link=links["master"]["link"],
         filename=os.path.basename(delta_csv_path),
         folder_link=links["scraped_root_link"],
+        attachment_path=Prepossessed_sheet_name
     )
 
     print("CSV uploaded and email sent")

@@ -10,6 +10,24 @@ from datetime import datetime, timedelta
 from multiprocessing import Process, Manager
 
 URL = "https://vahan.parivahan.gov.in/vahan4dashboard/vahan/view/reportview.xhtml"
+Today = datetime.now().date()
+
+if Today.day == 1:
+    print("Today is the first day of the month.")
+    month = Today.month - 1
+    if month == 0:
+        month = 12
+    print(f"Setting month to previous month: {month}")
+
+else :
+    month = Today.month
+
+if Today.day == 1 and Today.month == 1:
+    print("Today is the first day of the year happy new year.")
+    new_year = True
+
+else:
+    new_year = False
 
 # ******************Config*********************
 final_folder = f"{time.strftime('%Y-%m-%d')}_RTO_Files"
@@ -63,7 +81,7 @@ def restart_driver(state_name, download_dir, logger, headless=False):
     chrome_options = Options()
     chrome_options.add_argument("--start-maximized")
     chrome_options.add_argument("--disable-notifications")
-    chrome_options.add_argument("--headless=new")
+    # chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--window-size=1920,1080")
     prefs = {"download.default_directory": download_dir}
     chrome_options.add_experimental_option("prefs", prefs)
@@ -161,13 +179,19 @@ def process_rto(driver, wait, visible_li, n, options_name, vehicle_type, downloa
         time.sleep(0.5)
         wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="xaxisVar_3"]'))).click()
         time.sleep(0.5)
+        # Year dropdown - only if new year
+        if new_year:
+            wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="selectedYear"]/div[3]/span'))).click()
+            time.sleep(0.5)
+            wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="selectedYear_3"]'))).click()
+            time.sleep(0.5)
 
         # Refresh chart
         wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/form/div[2]/div/div/div[1]/div[3]/div[3]/div/button'))).click()
         time.sleep(1)
 
         # Month dropdown - ensure the desired month (you used _12 previously)
-        m = datetime.now().month
+        m = month
         print(f"Current month: {m}")
         wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="groupingTable:selectMonth"]/div[3]'))).click()
         time.sleep(0.5)
@@ -221,7 +245,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
     
     chrome_options = Options()
     chrome_options.add_argument("--start-maximized")
-    chrome_options.add_argument("--headless=new") 
+    # chrome_options.add_argument("--headless=new") 
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("detach", False)
     prefs = {"download.default_directory": download_dir}
@@ -324,7 +348,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
 
                         # Re-select month so subsequent process_rto calls use same month
                         try:
-                            m = datetime.now().month
+                            m = month
                             wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="groupingTable:selectMonth"]/div[3]'))).click()
                             time.sleep(0.5)
                             wait.until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="groupingTable:selectMonth_{m}"]'))).click()
@@ -513,8 +537,7 @@ def main():
     logger.info(f"⏱️  Total time: {elapsed_time/60:.2f} minutes")
     logger.info(f"📊 Total state retry attempts: {retry_attempt}")
     logger.info(f"{'='*60}\n")
-    
-    # Run post-processing
+
     try:
         from datetime import date
         from preprocessing_services import consolidate_rto_files

@@ -84,11 +84,11 @@ def process_rto_file(filepath):
         if len(columns) > 0:
             columns[0] = 'Maker'
             df.columns = columns
-        yesterday = (date.today() - timedelta(days=1)).strftime('%d-%m-%y')
         # Remove empty rows (where Maker is NaN)
+        yesterday = (date.today() - timedelta(days=1)).strftime('%d-%m-%Y')
         df = df[df['Maker'].notna() & (df['Maker'] != '')]
         df = df[~df['Maker'].str.strip().isin(['Maker', 'TOTAL', ''])]
-        df.insert(0, 'scrape_timestamp', date.today().strftime('%d-%m-%y'))
+        df.insert(0, 'scrape_timestamp', date.today().strftime('%d-%m-%Y'))
         df.insert(1, 'timestamp', yesterday)
         df.insert(2, 'state', file_info['state'])
         df.insert(3, 'rto', file_info['rto'])
@@ -146,10 +146,8 @@ def consolidate_rto_files(input_folder, output_csv):
         print("No data was processed!")
 
 
+
+
 if __name__ == "__main__":
 
-    INPUT_FOLDER = "C:\\Users\\sanje_3wfdh8z\\Downloads\\2025-12-02_RTO_Files"
-    OUTPUT_CSV = f"cumulative_folder/{date.today().strftime('%Y-%m-%d')}.csv"
-
-    consolidate_rto_files(INPUT_FOLDER, OUTPUT_CSV)
     print("\nDone!")
