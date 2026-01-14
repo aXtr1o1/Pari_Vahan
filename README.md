@@ -25,6 +25,26 @@ The system handles browser crashes, 503 errors, auto-restart, parallel multiproc
 - **Delta calculation (NEW − OLD) into `delta_folder/`**
 - **Append to `final_master.csv` / `final_master.xlsx` for reporting**
 
+Core processing scripts:
+
+- `RTO_Scraper.py` → **Parallel Selenium scraper + orchestrator**. Handles:
+  - Infinite retries on state / RTO failures
+  - Crash detection (503 / browser crash) and automatic Chrome restart
+  - Daily folder creation in `Downloads\YYYY-MM-DD_RTO_Files`
+  - Post‑processing hook to consolidate, compute delta, and trigger mail/upload
+- `delta_data.py` → **Delta engine + mail/Drive trigger**. Handles:
+  - Automatically picking **yesterday vs today** CSV from `cumulative_folder/`
+  - Column‑wise numeric delta computation (NEW − OLD)
+  - Writing per‑day delta into `delta_folder/YYYY-MM-DD_delta.csv`
+  - Calling `upload_and_email(...)` from `mail_protocol_service`
+- `preprocess.py` → **Master preprocessing for BI**:
+  - Cleans and reshapes `final_master.csv` into `master_preprocessed.csv`
+  - Adds city, AO, maker short names, fuel grouping, FY, Month, Quarter, Zone
+- `mail_protocol_service/mail_protocol.py` → **Google Drive upload + mailer**:
+  - Uploads **Delta**, **Cumulative**, and **Master** CSV to a structured Drive folder
+  - Makes files/folders public (anyone with the link)
+  - Sends HTML email with links + attached `master_preprocessed.csv`
+
 ### 📦 Installation
 
 1. **Install Python**
@@ -85,6 +105,8 @@ This single command will:
 - **Compute the NEW − OLD delta** vs the previous day and write into `delta_folder/YYYY-MM-DD_delta.csv` (via `delta_data.py`)
 - **Append the delta to `final_master.csv`** in the project root
 - **Trigger email / upload** using the `mail_protocol_service` (if configured)
+  - Uploads files to Google Drive (`Parivahan scraped data` → `Delta` & `Cumulative`)
+  - Sends automated email with Drive links + attached preprocessed master
 
 You can also run each step manually if needed:
 
@@ -110,13 +132,25 @@ You can also run each step manually if needed:
   python delta_data.py
   ```
 
-### 📅 Daily Run Workflow (For End Users)
+### 📅 Run Triggers & Daily Workflow (For End Users)
 
-Once setup is done and the code has been verified to run without errors, the **normal daily usage** is:
+Once setup is done and the code has been verified to run without errors, there are **three ways (triggers)** to run the scraping pipeline:
 
-1. **Double‑click the Windows batch file**
-   - File: `RTO_scrapAutomation.bat`
-   - This opens a terminal window and automatically runs the full Python pipeline (scraping → consolidate → delta → master → mail).
+1. **Manual trigger (on‑demand)**
+   - Double‑click the Windows batch file: `RTO_scrapAutomation_Manual.bat` (in the project root).
+   - This opens a terminal window and automatically runs the full Python pipeline (scraping → consolidate → delta → master → mail/Drive).
+2. **Scheduled trigger at 6:00 AM (every day)**
+   - Windows Task Scheduler automatically calls the same batch file every day at **06:00**.
+3. **Startup trigger (on boot / logon)**
+   - Windows Task Scheduler calls the same batch file **once when the system boots/logs in** (to catch up if the machine was off at 6 AM).
+
+The scraping process itself typically takes **~60–90 minutes** end‑to‑end.
+
+#### What to expect while the pipeline is running
+
+1. **Double‑click (or scheduled run) of the batch file**
+   - File: `RTO_scrapAutomation_Manual.bat`
+   - Triggers `python RTO_Scraper.py` inside the correct environment/project folder.
 
 2. **Understand that scraping is headless**
    - Chrome runs **in the background (headless)** — you will not see a visible browser window.
@@ -136,6 +170,37 @@ Once setup is done and the code has been verified to run without errors, the **n
    - The terminal window will keep printing logs until all states are completed and the pipeline finishes.
    - When it is done, the window will either close or clearly show that the script has completed.
 
+### 🕒 Windows Task Scheduler Setup (6 AM & Startup)
+
+The same batch file `RTO_scrapAutomation_Manual.bat` is used for **all three triggers** (manual, daily schedule, startup). You only need to create **two scheduled tasks** in Windows:
+
+- **Task 1 – Daily 6:00 AM run**
+  1. Open **Task Scheduler** (Start → search “Task Scheduler”).
+  2. Click **Create Basic Task…** (or **Create Task…** for more options).
+  3. Name it something like **“RTO_Scraper_Daily_6AM”**.
+  4. **Trigger**: choose **Daily**, then set **Start time = 06:00:00**, repeat every 1 day.
+  5. **Action**: choose **Start a program**.
+     - **Program/script**: full path to `RTO_scrapAutomation_Manual.bat` (e.g. `C:\Users\<you>\OneDrive\Desktop\Pari\RTO_scrapAutomation_Manual.bat`).
+     - **Start in (optional)**: project folder path, e.g. `C:\Users\<you>\OneDrive\Desktop\Pari` (without quotes and without the `.bat` filename).
+  6. Finish and make sure **“Run whether user is logged on or not”** is enabled (if you use **Create Task…**).
+
+- **Task 2 – Run on Startup / Logon**
+  1. In **Task Scheduler**, click **Create Basic Task…**.
+  2. Name it something like **“RTO_Scraper_On_Startup”**.
+  3. **Trigger**: choose either:
+     - **When the computer starts** (if you want it at system boot), or
+     - **When I log on** (if you want it right after a specific user logs in).
+  4. **Action**: again choose **Start a program** and point to the same `RTO_scrapAutomation_Manual.bat`:
+     - **Program/script**: full path to `RTO_scrapAutomation_Manual.bat`.
+     - **Start in**: project folder path (same as above).
+  5. Save the task.
+
+After this, the pipeline will:
+
+- Run **automatically at 6:00 AM** every day.
+- Run **once on startup/logon** (useful if the machine was off at 6:00 AM).
+- Still allow **manual runs** any time by double‑clicking `RTO_scrapAutomation_Manual.bat`.
+
 ### 📊 Power BI Setup (Reporting on `final_master`)
 
 The main reporting source for dashboards is the **master file**:
@@ -153,14 +218,14 @@ In **Power BI Desktop**:
 
 For daily refresh:
 
-- **Run the pipeline** (`python RTO_Scraper.py`) so that `final_master.csv` is updated.
+- Ensure the pipeline has completed (whether via **manual**, **6 AM**, or **startup** trigger) so that `final_master.csv` is updated.
 - In Power BI Desktop, click **Refresh** to pull the latest appended rows.
 
 If you publish to Power BI Service, configure a **data refresh schedule** that runs **after** the automation on the machine that updates `final_master.csv`.
 
 ### 🚀 Daily Power BI Refresh & Publish Flow
 
-After the batch file / pipeline has completed for the day:
+After the batch file / pipeline has completed for the day (you can see from the terminal/logs that the run is finished):
 
 1. **Open the Power BI report (.pbix) on your machine.**
 2. Click **Refresh** on the Home tab to re‑load data from the updated `final_master.csv` (or `final_master.xlsx`).
@@ -178,6 +243,13 @@ After the batch file / pipeline has completed for the day:
    - All visuals load without error.
 8. Once confirmed, copy / share the **public or workspace link** with stakeholders **after** the new version is visible.
 
+This is the **standard daily user flow** once everything is set up:
+
+1. Let Task Scheduler run the scraper automatically (6:00 AM + at startup) or manually trigger it if needed.
+2. Wait 60–90 minutes for the scraping + processing + upload + mail to complete.
+3. Open the Power BI `.pbix`, click **Refresh**, then **Publish**, choose the correct workspace, and confirm.
+4. The **shared public/workspace link** now points to the **latest data**.
+
 ### 🧱 Project Structure
 
 project/
@@ -193,6 +265,13 @@ project/
 ├── `final_master.xlsx`           # Optional Excel version of the master
 ├── `Backup/`                     # Backup copies of master (`final_master.csv`, etc.)
 └── `mail_protocol_service/`      # Email / upload integration (uses latest delta/master)
+
+Inside `mail_protocol_service/`:
+
+- `mail_protocol.py`           # Google Drive upload, public link creation, automated e‑mail
+- `settings.yaml`              # PyDrive2 OAuth config (points to Google client secret JSON)
+- `mycreds.txt`                # Cached OAuth token (auto‑generated after first login)
+- `client_secret_*.json`       # Google API OAuth client for Drive (downloaded from Google Cloud)
 
 ### 🛠 Maintenance & Best Practices
 
@@ -224,3 +303,79 @@ project/
 - **Environment consistency**
   - Always run the scripts from the **same virtual environment** with the same `requirements.txt`.
   - If you change the schema (add/remove columns), update Power BI and any dependent reports accordingly.
+
+### 📧 & 📂 Changing the Mail ID (Drive Upload + SMTP Mail)
+
+There are **two pieces** when you change the mail/Drive identity:
+
+1. **Google Drive account (for uploads & public links)** – controlled via **PyDrive2 OAuth**.
+2. **SMTP mail account (from‑address for the notification mail)** – controlled via **SMTP settings** in `mail_protocol.py`.
+
+#### 1️⃣ Change Google Drive account (PyDrive2)
+
+Steps to move to a new Google account (or new client ID):
+
+1. In the new Google account, go to **Google Cloud Console** and create an **OAuth 2.0 Client ID (Desktop App)** for Drive API.
+2. Download the **`client_secret_....json`** file.
+3. Place this JSON in the `mail_protocol_service` folder (or any path you prefer).
+4. Open `mail_protocol_service/settings.yaml` and update:
+   - `client_config_file:` to the **full path** of the new `client_secret_....json` file.
+5. Delete the old cached credentials file **`mail_protocol_service/mycreds.txt`** (so the next run forces a fresh login).
+6. Run either:
+   - The full pipeline once (`python RTO_Scraper.py`), or
+   - A small test script that calls `upload_and_email(...)`.
+7. A browser window will open asking you to **log in and grant Drive access** – log in using the **new Google account** and approve.
+8. After success, a new `mycreds.txt` is created, and subsequent runs will upload to the **new Google Drive**.
+
+#### 2️⃣ Change SMTP mail account (From address)
+
+In `mail_protocol_service/mail_protocol.py`:
+
+- Update these lines to your new sender account and app password:
+
+  ```python
+  smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+  smtp_port = int(os.getenv("SMTP_PORT", 587))
+  smtp_user = "your_new_email@example.com"
+  smtp_password = "your_app_password_or_smtp_password"
+  ```
+
+Recommended for Gmail:
+
+- Use **App Passwords** (not your main password): in Google Account → Security → App passwords.
+- Set `smtp_port` to `465` and use **SSL**, as already configured in the script (`smtplib.SMTP_SSL`).
+
+If you want to hide credentials in environment variables instead:
+
+1. Create a `.env` file inside `mail_protocol_service` (same folder as `mail_protocol.py`) with:
+   ```env
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=465
+   SMTP_USER=your_new_email@example.com
+   SMTP_PASSWORD=your_app_password_or_smtp_password
+   ```
+2. Adjust `mail_protocol.py` to read:
+   ```python
+   smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+   smtp_port = int(os.getenv("SMTP_PORT", 465))
+   smtp_user = os.getenv("SMTP_USER")
+   smtp_password = os.getenv("SMTP_PASSWORD")
+   ```
+3. Restart any scheduled tasks / terminals to ensure the env is loaded (or run via the batch file which activates the environment).
+
+#### 3️⃣ Change recipient list
+
+The recipients for the automated email are configured in `delta_data.py` in the call to `upload_and_email(...)`:
+
+```python
+upload_and_email(
+    delta_csv_path=out_file,
+    cumulative_csv_path=new_path,
+    master_csv_path=PREPROCESS_MASTER_FILE,
+    recipient_email="sanjeevan@axtr.in"
+)
+```
+
+- Edit `recipient_email` to a **comma‑separated list** or the specific addresses you want (e.g. `"a@b.com,c@d.com"`).
+
+Once these three pieces are updated, the system will **upload to the new Drive**, send mail **from the new ID**, and **target the new recipients** automatically for all future runs.
