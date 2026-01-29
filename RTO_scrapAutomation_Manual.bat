@@ -45,35 +45,35 @@ if %hour_num% LSS 6 (
 echo [INFO] Time check passed (after 6:00 AM)
 echo.
 
-REM Check if today's folder already exists
-REM Use Python to get the correct date format (YYYY-MM-DD)
-for /f "delims=" %%i in ('python -c "import time; print(time.strftime('%%Y-%%m-%%d'))"') do set today_date=%%i
-set "today_folder=%today_date%_RTO_Files"
-set "downloads_path=%USERPROFILE%\Downloads\%today_folder%"
+@REM REM Check if today's folder already exists
+@REM REM Use Python to get the correct date format (YYYY-MM-DD)
+@REM for /f "delims=" %%i in ('python -c "import time; print(time.strftime('%%Y-%%m-%%d'))"') do set today_date=%%i
+@REM set "today_folder=%today_date%_RTO_Files"
+@REM set "downloads_path=%USERPROFILE%\Downloads\%today_folder%"
 
-echo [INFO] Checking for existing folder: %today_folder%
-echo [INFO] Full path: %downloads_path%
-echo.
+@REM echo [INFO] Checking for existing folder: %today_folder%
+@REM echo [INFO] Full path: %downloads_path%
+@REM echo.
 
-if exist "%downloads_path%" (
-    echo ========================================
-    echo   FOLDER ALREADY EXISTS
-    echo ========================================
-    echo [WARNING] Today's RTO folder already exists:
-    echo [PATH] %downloads_path%
-    echo.
-    echo [INFO] This indicates data collection has already been completed for today.
-    echo.
-    echo If you want to rerun this script:
-    echo   1. Delete the folder: %today_folder%
-    echo   2. Run this BAT file again manually
-    echo.
-    pause
-    exit /b 0
-)
+@REM if exist "%downloads_path%" (
+@REM     echo ========================================
+@REM     echo   FOLDER ALREADY EXISTS
+@REM     echo ========================================
+@REM     echo [WARNING] Today's RTO folder already exists:
+@REM     echo [PATH] %downloads_path%
+@REM     echo.
+@REM     echo [INFO] This indicates data collection has already been completed for today.
+@REM     echo.
+@REM     echo If you want to rerun this script:
+@REM     echo   1. Delete the folder: %today_folder%
+@REM     echo   2. Run this BAT file again manually
+@REM     echo.
+@REM     pause
+@REM     exit /b 0
+@REM )
 
-echo [INFO] Folder check passed (no existing folder for today)
-echo.
+@REM echo [INFO] Folder check passed (no existing folder for today)
+@REM echo.
 
 REM Check if Python is installed
 python --version >nul 2>&1

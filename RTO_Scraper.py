@@ -81,7 +81,7 @@ def restart_driver(state_name, download_dir, logger, headless=False):
     chrome_options = Options()
     chrome_options.add_argument("--start-maximized")
     chrome_options.add_argument("--disable-notifications")
-    # chrome_options.add_argument("--headless=new")
+    #chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--window-size=1920,1080")
     prefs = {"download.default_directory": download_dir}
     chrome_options.add_experimental_option("prefs", prefs)
@@ -89,7 +89,7 @@ def restart_driver(state_name, download_dir, logger, headless=False):
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
     wait = WebDriverWait(driver, 25)
     driver.get(URL)
-    time.sleep(7)
+    time.sleep(2)
 
     return driver, wait
 
@@ -131,6 +131,7 @@ def download_rename(rto_name, vehicle_type, download_dir, logger):
     return True
 
 from selenium.common.exceptions import NoSuchElementException
+
 
 def is_crashed(driver):
     try:
@@ -190,7 +191,6 @@ def process_rto(driver, wait, visible_li, n, options_name, vehicle_type, downloa
         wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/form/div[2]/div/div/div[1]/div[3]/div[3]/div/button'))).click()
         time.sleep(1)
 
-        # Month dropdown - ensure the desired month (you used _12 previously)
         m = month
         print(f"Current month: {m}")
         wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="groupingTable:selectMonth"]/div[3]'))).click()
@@ -227,6 +227,7 @@ def process_rto(driver, wait, visible_li, n, options_name, vehicle_type, downloa
 
     except Exception as e:
         logger.error(f"❌ Error at RTO {n}: {e}")
+        driver.quit()
         return False
 
 
@@ -245,7 +246,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
     
     chrome_options = Options()
     chrome_options.add_argument("--start-maximized")
-    # chrome_options.add_argument("--headless=new") 
+    #chrome_options.add_argument("--headless=new") 
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("detach", False)
     prefs = {"download.default_directory": download_dir}
@@ -259,7 +260,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
 
     try:
         driver.get(URL)
-        time.sleep(10)
+        time.sleep(3)
 
         # Open filter
         wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="filterLayout-toggler"]/span/a'))).click()
@@ -303,7 +304,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
                 # Crash detection before each iteration
                 if is_crashed(driver):
                     logger.error("❌ Site crashed / 503 detected!")
-                    time.sleep(10)
+                    time.sleep(3)
                     try:
                         driver.quit()
                     except Exception:
@@ -383,7 +384,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
                     logger.info(f"🔄 Exception restart #{crash_restarts} - will keep trying...")
 
                     driver, wait = restart_driver(state_name, download_dir, logger)
-                    time.sleep(5)
+                    time.sleep(3)
                     continue
 
         # INFINITE RETRY LOOP for failed RTOs
@@ -395,7 +396,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
             still_failed = []
 
             if is_crashed(driver):
-                time.sleep(10)
+                time.sleep(3)
                 logger.warning("Driver crashed before retry loop. Restarting...")
                 try:
                     driver.quit()
@@ -423,7 +424,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
                     time.sleep(1)
                 except Exception as e:
                     logger.warning(f"Could not repopulate visible_li for retries: {e}")
-                    time.sleep(15)
+                    time.sleep(3)
                     continue
 
             for n, vehicle_type, xpath in failed_rtos:
@@ -436,7 +437,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
             
             if failed_rtos:
                 logger.info(f"Still have {len(failed_rtos)} failed RTOs, will keep retrying...")
-                time.sleep(10)  # Wait before next retry round
+                time.sleep(3)  # Wait before next retry round
 
         logger.info(f"\n✅ {state_name} completed successfully - ALL RTOs processed!")
         state_success = True
@@ -481,18 +482,19 @@ def main():
     logger.info(f"Processing {len(STATES)} states simultaneously")
     logger.info(f"⚠️  NO RETRY LIMITS - Will run until completion")
     logger.info(f"{'='*60}\n")
+    # Only the main process should archive/create the final folder
+    if os.path.exists(FINAL_DIR):
+        time_suffix = datetime.now().strftime("%H-%M-%S")
+        archived_dir = f"{FINAL_DIR}_{time_suffix}"
+        os.rename(FINAL_DIR, archived_dir)
     os.makedirs(FINAL_DIR, exist_ok=True)
 
     start_time = time.time()
-    
-    # Manager to track state success/failure
     manager = Manager()
     shared_dict = manager.dict()
     
     retry_attempt = 0
     failed_states = []
-    
-    # INFINITE LOOP - will keep retrying failed states until all succeed
     while True:
         if retry_attempt > 0:
             logger.info(f"\n{'='*60}")
@@ -515,7 +517,7 @@ def main():
         logger.info(f"\n📊 All processes joined. Checking results...")
         failed_states = []
         for state_name in states_to_process.keys():
-            status = shared_dict.get(state_name, False)  # Default to False if not found
+            status = shared_dict.get(state_name, False)
             logger.info(f"State {state_name}: {'✅ SUCCESS' if status else '❌ FAILED'}")
             if not status:
                 failed_states.append(state_name)
@@ -527,7 +529,7 @@ def main():
         retry_attempt += 1
         logger.warning(f"\n⚠️ {len(failed_states)} state(s) failed: {failed_states}")
         logger.info(f"Retrying in 30 seconds...")
-        time.sleep(5)
+        time.sleep(2)
         
         
 
@@ -542,9 +544,11 @@ def main():
         from datetime import date
         from preprocessing_services import consolidate_rto_files
         from delta_data import main as delta_main
+        from renameCheck import run_rename_check
 
         INPUT_FOLDER = FINAL_DIR
         OUTPUT_CSV = f"cumulative_folder/{date.today().strftime('%Y-%m-%d')}.csv"
+        run_rename_check(INPUT_FOLDER)
         consolidate_rto_files(INPUT_FOLDER, OUTPUT_CSV)
         delta_main()
         logger.info("✅ Post-processing completed successfully")

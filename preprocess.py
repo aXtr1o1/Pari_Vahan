@@ -256,6 +256,7 @@ city_mapping = {
   "THIRUPATTUR RTO": "Vellore",
   "THIRUR SRTO": "Malappuram",
   "THIRURANGADI SRTO": "Malappuram",
+  "THIRUBUVANAI(VILLIANUR)": "Pondicherry",
   "THIRUTHURAIPOONDI UO": "Thanjavur",
   "THIRUTTANI UO": "Chennai",
   "THIRUVALLA SRTO": "Pathanamthitta",
@@ -310,10 +311,32 @@ city_mapping = {
 }
 
 rto_ao_mapping = {
+  "ADOOR SRTO": "RO South3",
+  "ALANGUDI UO": "Thanjavur",
+  "ALANGULAM UO": "Tirunelveli",
+  "ALAPPUZHA RTO": "RO South3",
+  "ALATHUR SRTO": "RO South3",
+  "ALUVA SRTO": "RO South3",
+  "AMBASAMUTHIRAM UO": "Tirunelveli",
+  "AMBATTUR RTO": "RO South2",
+  "AMBUR UO": "RO South2",
+  "ANGAMALI SRTO": "RO South3",
+  "ARAKKONAM UO": "RO South2",
+  "ARANI RTO": "RO South2",
+  "ARANTHANGI UO": "Thanjavur",
+  "ARAVAKURICHI UO": "RO South2",
+  "ARIYALUR RTO": "Tiruchirappalli",
+  "ARUPPUKOTTAI UO": "Madurai",
   "ATHANI ARTO": "RO South1",
+  "ATTINGAL RTO": "RO South3",
+  "ATTUR RTO": "RO South2",
+  "AVINASHI UO": "Coimbatore",
   "BAGALKOT  RTO": "RO South1",
+  "BAHOUR": "RO South2",
+  "BAILHONGAL  RTO": "RO South1",
   "BANTWALA ARTO": "Mangalore",
   "BASAVAKALYAN ARTO": "RO South1",
+  "BATLAGUNDU UO": "Tiruchirappalli",
   "BELLARY  RTO": "RO South1",
   "BENGALURU CENTRAL  RTO": "RO South1",
   "BENGALURU EAST  RTO": "RO South1",
@@ -321,113 +344,280 @@ rto_ao_mapping = {
   "BENGALURU SOUTH  RTO": "RO South1",
   "BENGALURU WEST  RTO": "RO South1",
   "BHALKI  ARTO": "RO South1",
+  "BHAVANI UO": "RO South2",
   "BIDAR  RTO": "RO South1",
   "BIJAPUR  RTO": "RO South1",
+  "CHADAYAMANGALA SRTO": "RO South3",
+  "CHALAKKUDY SRTO": "RO South3",
   "CHAMARAJANAGAR  RTO": "RO South1",
   "CHANDAPURA, BENGALURU RTO": "RO South1",
+  "CHANGANACHERRY SRTO": "RO South3",
+  "CHENGALPATTU RTO": "RO South2",
+  "CHENGANNUR SRTO": "RO South3",
+  "CHENNAI (CENTRAL) RTO": "RO South2",
+  "CHENNAI (EAST) RTO": "RO South2",
+  "CHENNAI (NORTH) RTO": "RO South2",
+  "CHENNAI (NORTH-EAST) RTO": "RO South2",
+  "CHENNAI (SOUTH) RTO": "RO South2",
+  "CHENNAI (SOUTH-EAST) RTO": "RO South2",
+  "CHENNAI (SOUTH-WEST) RTO": "RO South2",
+  "CHENNAI (WEST) RTO": "RO South2",
+  "CHERTHALA SRTO": "RO South3",
+  "CHEYYAR UO": "RO South2",
   "CHICKABALLAPUR  RTO": "RO South1",
+  "CHIDAMBARAM RTO": "RO South2",
   "CHIKAMANGLUR RTO": "Mangalore",
   "CHIKKODI  RTO": "RO South1",
+  "CHINTAMANI ARTO": "RO South1",
   "CHITRADURGA  RTO": "RO South1",
+  "CHITTUR SRTO": "RO South3",
+  "COIMBATORE (CENTRAL) RTO": "Coimbatore",
+  "COIMBATORE (NORTH) RTO": "Coimbatore",
+  "COIMBATORE (SOUTH) RTO": "Coimbatore",
+  "COIMBATORE (WEST) RTO": "Coimbatore",
+  "CUDDALORE RTO": "RO South2",
+  "DANDELI ARTO": "RO South1",
   "DAVANAGERE  RTO": "RO South1",
   "DEVANAHALLI  ARTO": "RO South1",
+  "DEVIKULAM SRTO": "RO South3",
+  "DHARAPURAM RTO": "Coimbatore",
+  "DHARMAPURI RTO": "RO South2",
   "DHARWAD EAST RTO": "RO South1",
   "DHARWAD WEST RTO": "RO South1",
+  "DINDIGUL RTO": "Tiruchirappalli",
   "ELECTRONIC CITY  RTO": "RO South1",
+  "ERNAKULAM RTO": "RO South3",
+  "ERODE (WEST) RTO": "RO South2",
+  "ERODE RTO": "RO South2",
   "GADAG  RTO": "RO South1",
+  "GINGEE UO": "RO South2",
   "GOKAK  ARTO": "RO South1",
+  "GOPICHETTIPALAYAM RTO": "RO South2",
+  "GUDALORE UO": "Coimbatore",
+  "GUDIYATHAM UO": "RO South2",
+  "GUMMIDIPOONDI UO": "RO South2",
+  "GURUVAYUR SRTO": "RO South3",
+  "HARUR UO": "RO South2",
   "HASSAN  RTO": "Mangalore",
   "HAVERI  RTO": "RO South1",
   "HONNAVAR  ARTO": "RO South1",
   "HOSPET  RTO": "RO South1",
+  "HOSUR RTO": "RO South2",
   "HUNSUR  ARTO": "RO South1",
+  "IDUKKI RTO": "RO South3",
+  "ILLUPPUR UO": "Thanjavur",
+  "IRINJALAKUDA SRTO": "RO South3",
+  "IRITTY SRTO": "Kannur",
+  "JAMKHANDI  ARTO": "RO South1",
   "JNANABHARATHI  RTO": "RO South1",
   "K G F  ARTO": "RO South1",
   "KALABURAGI  RTO": "RO South1",
-  "KARWAR  RTO": "RO South1",
-  "KOLAR  RTO": "RO South1",
-  "KOPPAL  RTO": "RO South1",
-  "KRISHNARAJAPURAM  RTO": "RO South1",
-  "MADIKERI  RTO": "RO South1",
-  "MANDYA  RTO": "RO South1",
-  "MANGALORE  RTO": "Mangalore",
-  "MYSURU  EAST  RTO": "RO South1",
-  "MYSURU WEST  RTO": "RO South1",
-  "NELAMANGALA  RTO": "RO South1",
-  "PUTTUR  RTO": "Mangalore",
-  "RAICHUR  RTO": "RO South1",
-  "RAMANAGAR  RTO": "RO South1",
-  "SHIMOGA  RTO": "RO South1",
-  "SIRSI  RTO": "RO South1",
-  "TIPTUR  ARTO": "RO South1",
-  "TUMKUR  RTO": "RO South1",
-  "UDUPI  RTO": "Mangalore",
-  "YADGIRI  RTO": "RO South1",
-  "YALAHANKA  RTO": "RO South1",
-  "STU AND AUTORIKSHAW,  SHANTHINAGAR RTO": "RO South1",
-
-  "ALUVA SRTO": "RO South3",
-  "ANGAMALI SRTO": "RO South3",
-  "ATTINGAL RTO": "RO South3",
-  "CHALAKKUDY SRTO": "RO South3",
-  "ERNAKULAM RTO": "RO South3",
-  "GURUVAYUR SRTO": "RO South3",
-  "KOLLAM RTO": "RO South3",
-  "KOTTAYAM RTO": "RO South3",
-  "MALAPPURAM RTO": "RO South3",
-  "PALAKKAD RTO": "RO South3",
-  "PATHANAMTHITTA RTO": "RO South3",
-  "THRISSUR RTO": "RO South3",
-  "TRIVANDRUM RTO": "RO South3",
-
-  "IRITTY SRTO": "Kannur",
+  "KALLAKURICHI RTO": "RO South2",
+  "KANCHEEPURAM RTO": "RO South2",
+  "KANGEYAM UO": "Coimbatore",
+  "KANHANGAD SRTO": "Kannur",
+  "KANJIRAPPALLY SRTO": "RO South3",
   "KANNUR RTO": "Kannur",
-  "KASARGODE RTO": "Kannur",
-  "PAYYANNUR SRTO": "Kannur",
-  "THALASSERY SRTO": "Kannur",
-  "THALIPARAMBA SRTO": "Kannur",
-
-  "KOZHIKODE RTO": "Kozhikode",
-  "VADAKARA RTO": "Kozhikode",
-  "WAYANAD RTO": "Kozhikode",
-
-  "PUDUCHERRY": "RO South2",
   "KARAIKAL": "RO South2",
-  "MAHE": "RO South2",
-  "YANAM": "RO South2",
-
-  "CHENNAI (CENTRAL) RTO": "RO South2",
-  "CHENNAI (NORTH) RTO": "RO South2",
-  "CHENNAI (SOUTH) RTO": "RO South2",
-  "CHENNAI (WEST) RTO": "RO South2",
-  "AMBATTUR RTO": "RO South2",
-  "TAMBARAM RTO": "RO South2",
-  "VELLORE RTO": "RO South2",
-  "SALEM (EAST) RTO": "RO South2",
-  "SALEM (WEST) RTO": "RO South2",
-  "ERODE RTO": "RO South2",
-
-  "COIMBATORE (CENTRAL) RTO": "Coimbatore",
-  "COIMBATORE (NORTH) RTO": "Coimbatore",
-  "COIMBATORE (SOUTH) RTO": "Coimbatore",
-  "TIRUPPUR (NORTH) RTO": "Coimbatore",
-  "TIRUPPUR (SOUTH) RTO": "Coimbatore",
-
+  "KARAIKUDI UO": "Madurai",
+  "KARUNAGAPPALLY SRTO": "RO South3",
+  "KARUR RTO": "RO South2",
+  "KARWAR  RTO": "RO South1",
+  "KASARGODE RTO": "Kannur",
+  "KATTAKADA SRTO": "RO South3",
+  "KAYAMKULAM SRTO": "RO South3",
+  "KAZHAKUTTOM SRTO": "RO South3",
+  "KODUNGALLUR SRTO": "RO South3",
+  "KODUVALLY SRTO": "Kozhikode",
+  "KOILANDY SRTO": "Kozhikode",
+  "KOLAR  RTO": "RO South1",
+  "KOLLAM RTO": "RO South3",
+  "KONDOTTY SRTO": "RO South3",
+  "KONNI SRTO": "RO South3",
+  "KOPPAL  RTO": "RO South1",
+  "KOTHAMANGALAM SRTO": "RO South3",
+  "KOTTARAKKARA SRTO": "RO South3",
+  "KOTTAYAM RTO": "RO South3",
+  "KOVILPATTI RTO": "Tirunelveli",
+  "KOZHIKODE RTO": "Kozhikode",
+  "KRISHNAGIRI RTO": "RO South2",
+  "KRISHNARAJAPURAM  RTO": "RO South1",
+  "KULITHALI UO": "RO South2",
+  "KUMARAPALAYAM RTO": "RO South2",
+  "KUMBAKONAM RTO": "Thanjavur",
+  "KUNDRATHUR RTO": "RO South2",
+  "KUNNATHUR SRTO": "RO South3",
+  "KUTTANADU SRTO": "RO South3",
+  "LALKUDI UO": "Tiruchirappalli",
+  "MADHUGIRI, TUMAKURU ARTO": "RO South1",
+  "MADIKERI  RTO": "RO South1",
   "MADURAI (CENTRAL) RTO": "Madurai",
   "MADURAI (NORTH) RTO": "Madurai",
   "MADURAI (SOUTH) RTO": "Madurai",
-
-  "TIRUNELVELI RTO": "Tirunelveli",
-  "TENKASI RTO": "Tirunelveli",
-  "THOOTHUKUDI RTO": "Tirunelveli",
-
-  "THANJAVUR RTO": "Thanjavur",
-  "KUMBAKONAM RTO": "Thanjavur",
+  "MADURANTAGAM UO": "RO South2",
+  "MAHE": "RO South2",
+  "MALAPPURAM RTO": "RO South3",
+  "MALLAPPALLY SRTO": "RO South3",
+  "MANANTHAVADY SRTO": "Kozhikode",
+  "MANAPARAI UO": "Tiruchirappalli",
+  "MANDYA  RTO": "RO South1",
+  "MANGALORE  RTO": "Mangalore",
+  "MANMANGALAM UO": "RO South2",
+  "MANNARGHAT SRTO": "RO South3",
+  "MANNARGUDI UO": "Thanjavur",
+  "MARTHANDAM RTO": "Kanyakumari",
+  "MATTANCHERRY SRTO": "RO South3",
+  "MAVELIKKARA SRTO": "RO South3",
+  "MAYILADUTHURAI RTO": "Thanjavur",
+  "MEENAMBAKKAM RTO": "RO South2",
+  "MELUR UO": "Madurai",
+  "METTUPALAYAM RTO": "Coimbatore",
+  "METTUR RTO": "RO South2",
+  "MUSURI UO": "Tiruchirappalli",
+  "MUVATTUPUZHA RTO": "RO South3",
+  "MYSURU  EAST  RTO": "RO South1",
+  "MYSURU WEST  RTO": "RO South1",
+  "NAGAMANGALA  RTO": "RO South1",
   "NAGAPATTINAM RTO": "Thanjavur",
-
-  "TIRUCHI RTO": "Tiruchirappalli",
+  "NAGERCOIL RTO": "Kanyakumari",
+  "NAMAKKAL (NORTH) RTO": "RO South2",
+  "NAMAKKAL (SOUTH) RTO": "RO South2",
+  "NANMANDA SRTO": "Kozhikode",
+  "NATHAM UO": "Tiruchirappalli",
+  "NEDUMANGADU SRTO": "RO South3",
+  "NELAMANGALA  RTO": "RO South1",
+  "NEYVELI UO": "RO South2",
+  "NEYYATTINKARA SRTO": "RO South3",
+  "NILAMBUR SRTO": "RO South3",
+  "NORTH PARUR SRTO": "RO South3",
+  "ODDANCHATRAM  UO": "Tiruchirappalli",
+  "OMALURE UO": "RO South2",
+  "OOTY RTO": "Coimbatore",
+  "OTTAPPALAM SRTO": "RO South3",
+  "OULGARET": "RO South2",
+  "PALACODE UO": "RO South2",
+  "PALAI SRTO": "RO South3",
+  "PALAKKAD RTO": "RO South3",
+  "PALANI RTO": "Tiruchirappalli",
+  "PANRUTI UO": "RO South2",
+  "PARAMAKUDI UO": "Madurai",
+  "PARAMATHI VELLURE UO": "RO South2",
+  "PARASSALA SRTO": "RO South3",
+  "PATHANAMTHITTA RTO": "RO South3",
+  "PATHANAPURAM SRTO": "RO South3",
+  "PATTAMBI SRTO": "RO South3",
+  "PATTUKOTTAI UNIT OFFICE": "Thanjavur",
+  "PAYYANNUR SRTO": "Kannur",
+  "PERAMBALUR RTO": "Tiruchirappalli",
+  "PERAMBRA SRTO": "Kozhikode",
+  "PERINTHALMANNA SRTO": "Malappuram",
+  "PERUMBAVUR SRTO": "RO South3",
+  "PERUNDURAI RTO": "RO South2",
+  "POLLACHI RTO": "Coimbatore",
+  "PONNANI SRTO": "RO South3",
+  "POONAMALLEE RTO": "RO South2",
+  "PUDUCHERRY": "RO South2",
+  "PUDUKOTTAI RTO": "Thanjavur",
+  "PUNALUR SRTO": "RO South3",
+  "PUTTUR  RTO": "Mangalore",
+  "RAICHUR  RTO": "RO South1",
+  "RAJAPALAYAM UO": "Madurai",
+  "RAMANAGAR  RTO": "RO South1",
+  "RAMANATHAPURAM RTO": "Madurai",
+  "RAMANATTUKARA (FEROKE) SRTO": "Kozhikode",
+  "RAMDURGA ARTO": "RO South1",
+  "RANIBENNUR ARTO": "RO South1",
+  "RANIPET RTO": "RO South2",
+  "RANNI SRTO": "RO South3",
+  "RASIPURAM UO": "RO South2",
+  "REDHILLS RTO": "RO South2",
+  "REGIONAL TRANSPORT OFFICE BELAGAVI": "RO South1",
+  "RTO CHENNAI (NORTH WEST)": "RO South2",
+  "SAGAR  ARTO": "RO South1",
+  "SAKALESHPURA  ARTO": "Mangalore",
+  "SALEM (EAST) RTO": "RO South2",
+  "SALEM (SOUTH) RTO": "RO South2",
+  "SALEM (WEST) RTO": "RO South2",
+  "SANKAGIRI RTO": "RO South2",
+  "SANKARANKOVIL RTO": "Tirunelveli",
+  "SATHYAMANGALAM UO": "RO South2",
+  "SHIMOGA  RTO": "RO South1",
+  "SHOLINGANALLUR RTO": "RO South2",
+  "SIRKALI UO": "Thanjavur",
+  "SIRSI  RTO": "RO South1",
+  "SIVAGANGAI RTO": "Madurai",
+  "SIVAKASI RTO": "Madurai",
+  "SRIPERUMBUDUR RTO": "RO South2",
   "SRIRANGAM RTO": "Tiruchirappalli",
-  "DINDIGUL RTO": "Tiruchirappalli"
+  "SRIVILLIPUTHUR RTO": "Madurai",
+  "STU AND AUTORIKSHAW,  SHANTHINAGAR RTO": "RO South1",
+  "SULTHANBATHERY SRTO": "Kozhikode",
+  "SULUR UO": "Coimbatore",
+  "TAMBARAM RTO": "RO South2",
+  "TARIKERE, CHIKKAMAGALURU ARTO": "Mangalore",
+  "TENKASI RTO": "Tirunelveli",
+  "THALASSERY SRTO": "Kannur",
+  "THALIPARAMBA SRTO": "Kannur",
+  "THANJAVUR RTO": "Thanjavur",
+  "THENI RTO": "Madurai",
+  "THIRUCHENDUR RTO": "Tirunelveli",
+  "THIRUKALUKUNTRAM UO": "RO South2",
+  "THIRUMANGALAM  UO": "Madurai",
+  "THIRUPATTUR RTO": "RO South2",
+  "THIRUR SRTO": "RO South3",
+  "THIRURANGADI SRTO": "RO South3",
+  "THIRUBUVANAI(VILLIANUR)": "RO South2",
+  "THIRUTHURAIPOONDI UO": "Thanjavur",
+  "THIRUTTANI UO": "RO South2",
+  "THIRUVALLA SRTO": "RO South3",
+  "THODUPUZHA SRTO": "RO South3",
+  "THOOTHUKUDI RTO": "Tirunelveli",
+  "THRIPRAYAR SRTO": "RO South3",
+  "THRISSUR RTO": "RO South3",
+  "THURAIYUR UO": "Tiruchirappalli",
+  "TINDIVANAM RTO": "RO South2",
+  "TIPTUR  ARTO": "RO South1",
+  "TIRUCHENGODE RTO": "RO South2",
+  "TIRUCHI RTO": "Tiruchirappalli",
+  "TIRUCHI(EAST) RTO": "Tiruchirappalli",
+  "TIRUNELVELI RTO": "Tirunelveli",
+  "TIRUPPUR (NORTH) RTO": "Coimbatore",
+  "TIRUPPUR (SOUTH) RTO": "Coimbatore",
+  "TIRUVALLUR RTO": "RO South2",
+  "TIRUVANNAMALAI RTO": "RO South2",
+  "TIRUVARUR RTO": "Thanjavur",
+  "TIRUVERANBUR UO": "Tiruchirappalli",
+  "TRIPUNITHURA SRTO": "RO South3",
+  "TRIVANDRUM RTO": "RO South3",
+  "TUMKUR  RTO": "RO South1",
+  "UDUMALPET RTO": "Coimbatore",
+  "UDUMBANCHOLA SRTO": "RO South3",
+  "UDUPI  RTO": "Mangalore",
+  "ULUNDURPET RTO": "RO South2",
+  "USILAMPATTI UO": "Madurai",
+  "UTHAMAPALAYAM UO": "Madurai",
+  "UZHAVOOR SRTO": "RO South3",
+  "VADAKARA RTO": "Kozhikode",
+  "VADIPATTI UO": "Madurai",
+  "VAIKOM SRTO": "RO South3",
+  "VALAPPADI UO": "RO South2",
+  "VALLIYUR UO": "Tirunelveli",
+  "VALPARAI UO": "Coimbatore",
+  "VANDIPERIYAR SRTO": "RO South3",
+  "VANIYAMBADI RTO": "RO South2",
+  "VARKALA SRTO": "RO South3",
+  "VEDACHANDUR UO": "Tiruchirappalli",
+  "VELLARIKUNDU SRTO": "Kannur",
+  "VELLORE RTO": "RO South2",
+  "VILLIANUR": "RO South2",
+  "VILUPPURAM RTO": "RO South2",
+  "VIRUDHACHALAM UO": "RO South2",
+  "VIRUDHUNAGAR RTO": "Madurai",
+  "WADAKKANCHERRY SRTO": "RO South3",
+  "WAYANAD RTO": "Kozhikode",
+  "YADGIRI  RTO": "RO South1",
+  "YALAHANKA  RTO": "RO South1",
+  "YANAM": "RO South2"
 }
 
 maker_short_mapping = {
@@ -514,8 +704,12 @@ def get_financial_quarter(date):
         return "Q4"
 def preprocess_master():
     df = pd.read_csv("final_master.csv")
-
+    # df = pd.read_csv("BeforeTest.csv")
     df = df.drop(columns=["scrape_timestamp"], errors="ignore")
+    
+    # Track initial total - we'll calculate it from fuel columns after they're identified
+    # This ensures we're comparing the same thing (fuel columns sum)
+    initial_total = None
 
 
     df = df.rename(columns={
@@ -533,15 +727,14 @@ def preprocess_master():
 
 
     df["Date"] = pd.to_datetime(df["Date"], dayfirst=True, format="mixed",errors="raise")
-
-    # Add city column using city_mapping
     df["city"] = df["RTO"].map(city_mapping)
-
-    # Add AO column using rto_ao_mapping
     df["AO"] = df["RTO"].map(rto_ao_mapping)
-
-    # Add maker_short column using maker_short_mapping
     df["maker_short"] = df["OEM"].map(maker_short_mapping)
+    
+    # Check for missing mappings
+    missing_ao_count = df["AO"].isna().sum()
+    if missing_ao_count > 0:
+        print(f"Warning: {missing_ao_count} rows have missing AO mapping")
 
     id_cols = [
         "Date", "state","cluster","city","AO","RTO",
@@ -550,6 +743,10 @@ def preprocess_master():
     ]
 
     fuel_cols = [c for c in df.columns if c not in id_cols and c != "TOTAL"]
+    
+    # Calculate initial total from fuel columns sum (before melt)
+    # This is the actual data we'll be processing
+    initial_total = df[fuel_cols].sum().sum()
 
 
     out = df.melt(
@@ -561,17 +758,39 @@ def preprocess_master():
 
     out["Regn Vol"] = pd.to_numeric(out["Regn Vol"], errors="coerce").fillna(0)
     out = out[out["Regn Vol"] > 0]
+    
+    total_after_melt = out["Regn Vol"].sum()
 
 
     out["FuelGroup"] = out["FuelType"].map(fuel_lookup)
+    missing_fuel_count = out["FuelGroup"].isna().sum()
+    missing_fuel_volume = out[out["FuelGroup"].isna()]["Regn Vol"].sum()
+    if missing_fuel_count > 0:
+        print(f"Warning: {missing_fuel_count} rows have unmapped FuelTypes (volume: {missing_fuel_volume})")
     out = out.dropna(subset=["FuelGroup"])
+    
+    total_after_fuel_mapping = out["Regn Vol"].sum()
 
 
     grouped = (
         out
-        .groupby(id_cols + ["FuelGroup"], as_index=False)["Regn Vol"]
+        .groupby(id_cols + ["FuelGroup"], dropna=False, as_index=False)["Regn Vol"]
         .sum()
     )
+    
+    final_total = grouped["Regn Vol"].sum()
+    
+    # Report data tracking
+    if initial_total is not None:
+        print(f"Data tracking: Initial={initial_total}, After melt={total_after_melt}, After fuel mapping={total_after_fuel_mapping}, Final={final_total}")
+        difference = initial_total - final_total
+        if abs(difference) > 0.01:
+            if difference > 0:
+                print(f"WARNING: Data loss detected! Lost {difference:.2f} values")
+            else:
+                print(f"WARNING: Data gain detected! Gained {abs(difference):.2f} values (TOTAL column may be incorrect in source data)")
+        else:
+            print("Data integrity: All values preserved")
 
     grouped["Zone"] = grouped["state"].map({
         "Karnataka": "S1",
@@ -580,20 +799,15 @@ def preprocess_master():
         "Kerala": "S3"
     })
 
-    # Financial Year
     grouped["FY"] = grouped["Date"].apply(get_financial_year)
-
-    # Month name
     grouped["month"] = grouped["Date"].dt.strftime("%B")
-
-    # Financial Quarter
     grouped["Qtr"] = grouped["Date"].apply(get_financial_quarter)
 
     grouped.to_csv("master_preprocessed.csv", index=False)
+    # grouped.to_csv("AfterTest.csv", index=False)
 
     print("Saved:", grouped.shape, "-> master_preprocessed.csv")
 
 if __name__ == "__main__":
 
     preprocess_master()
-    print("\nDone!")

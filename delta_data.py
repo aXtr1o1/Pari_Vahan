@@ -107,6 +107,32 @@ def compute_delta(old_df: pd.DataFrame, new_df: pd.DataFrame):
 
     return out_df, candidate_cols
 
+def drop_today_rows(csv_path):
+    df = pd.read_csv(csv_path)
+
+    if "scrape_timestamp" not in df.columns:
+        print("No scrape_timestamp column found.")
+        return df, 0
+
+    scraped = pd.to_datetime(
+        df["scrape_timestamp"].astype(str).str.strip(),
+        errors="coerce",
+        dayfirst=True,
+    )
+    today = datetime.today().date()
+    mask_today = scraped.dt.date == today
+    has_rows = mask_today.any()
+
+    print("Yes rows exist" if has_rows else "No rows exist")
+
+    dropped = int(mask_today.sum())
+    df = df[~mask_today]
+
+    df.to_csv(csv_path, index=False)
+    print(f"Rows dropped: {dropped}")
+    print(f"Saved updated file: {csv_path}")
+    return df, dropped
+
 
 def append_to_final(final_file: str, out_df: pd.DataFrame):
     """
@@ -167,10 +193,11 @@ def main():
         )
 
 
-    #append_to_final(FINAL_FILE, out_df)
-    # preprocess_master()
+    drop_today_rows(FINAL_FILE)
+    append_to_final(FINAL_FILE, out_df)
+    preprocess_master()
     # upload_and_email(delta_csv_path=out_file,cumulative_csv_path=new_path,master_csv_path=PREPROCESS_MASTER_FILE, recipient_email ="sanjeevan@axtr.in,rauf@axtr.in,sanjeevanmanoranjan@gmail.com,alphaf.qcl@tatamotors.com,karthik.krishnan@tatamotors.com")
-    upload_and_email(delta_csv_path=out_file,cumulative_csv_path=new_path,master_csv_path=PREPROCESS_MASTER_FILE, recipient_email ="sanjeevan@axtr.in")
+    # upload_and_email(delta_csv_path=out_file,cumulative_csv_path=new_path,master_csv_path=PREPROCESS_MASTER_FILE, recipient_email ="sanjeevan@axtr.in,alphaf.qcl@tatamotors.com")
 
 
 if __name__ == "__main__":
