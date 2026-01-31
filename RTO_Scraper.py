@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-import json, os, time, shutil, logging
+import json, os, time, shutil, logging, uuid
 from datetime import datetime, timedelta
 from multiprocessing import Process, Manager
 
@@ -81,7 +81,7 @@ def restart_driver(state_name, download_dir, logger, headless=False):
     chrome_options = Options()
     chrome_options.add_argument("--start-maximized")
     chrome_options.add_argument("--disable-notifications")
-    #chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--window-size=1920,1080")
     prefs = {"download.default_directory": download_dir}
     chrome_options.add_experimental_option("prefs", prefs)
@@ -110,15 +110,7 @@ def download_rename(rto_name, vehicle_type, download_dir, logger):
 
     latest_file = max(files, key=os.path.getctime)
 
-    base_name = f"{rto_name}_{vehicle_type}.xlsx"
-    new_path = os.path.join(download_dir, base_name)
-
-    if os.path.exists(new_path):
-        os.remove(new_path)
-
-    os.rename(latest_file, new_path)
-    logger.info(f"Renamed: {os.path.basename(latest_file)} → {base_name}")
-
+    base_name = f"{uuid.uuid4()}_{vehicle_type}.xlsx"
     os.makedirs(FINAL_DIR, exist_ok=True)
     final_path = os.path.join(FINAL_DIR, base_name)
 
@@ -126,8 +118,8 @@ def download_rename(rto_name, vehicle_type, download_dir, logger):
         logger.warning(f"{final_path} exists, overwriting")
         os.remove(final_path)
 
-    shutil.move(new_path, final_path)
-    logger.info(f"Moved file to: {final_path}")
+    shutil.move(latest_file, final_path)
+    logger.info(f"Moved and renamed file to: {final_path}")
     return True
 
 from selenium.common.exceptions import NoSuchElementException
@@ -216,18 +208,22 @@ def process_rto(driver, wait, visible_li, n, options_name, vehicle_type, downloa
         wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/form/div[2]/div/div/div[3]/div/div[1]/div[1]/span/button'))).click()
         time.sleep(1)
 
-        # Click download
-        wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/form/div[2]/div/div/div[3]/div/div[2]/div/div/div[1]/div[1]/a/img'))).click()
-        logger.info("📥 Download triggered")
-        time.sleep(2)
+        # Click download until file appears
+        retry_count = 0
+        while True:
+            retry_count += 1
+            wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/form/div[2]/div/div/div[3]/div/div[2]/div/div/div[1]/div[1]/a/img'))).click()
+            logger.info(f"📥 Download triggered (attempt {retry_count})")
+            time.sleep(2)
 
-        # Attempt rename/move
-        download_rename(rto_name, vehicle_type, download_dir, logger)
+            success = download_rename(rto_name, vehicle_type, download_dir, logger)
+            if success:
+                break
+            logger.info("🔁 No Excel file found, retrying download...")
         return True
 
     except Exception as e:
         logger.error(f"❌ Error at RTO {n}: {e}")
-        driver.quit()
         return False
 
 
@@ -246,7 +242,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
     
     chrome_options = Options()
     chrome_options.add_argument("--start-maximized")
-    #chrome_options.add_argument("--headless=new") 
+    chrome_options.add_argument("--headless=new") 
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("detach", False)
     prefs = {"download.default_directory": download_dir}
@@ -448,7 +444,6 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
         state_success = False
 
     finally:
-        # Report status to shared dict if provided
         if shared_dict is not None:
             shared_dict[state_name] = state_success
             logger.info(f"📊 Reported status for {state_name}: {state_success}")
@@ -528,7 +523,7 @@ def main():
         
         retry_attempt += 1
         logger.warning(f"\n⚠️ {len(failed_states)} state(s) failed: {failed_states}")
-        logger.info(f"Retrying in 30 seconds...")
+        logger.info(f"Retrying")
         time.sleep(2)
         
         
