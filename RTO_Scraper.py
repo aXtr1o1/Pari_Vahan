@@ -143,7 +143,6 @@ def process_rto(driver, wait, visible_li, n, options_name, vehicle_type, downloa
         def li_text(li):
             return (li.text or li.get_attribute("textContent") or "").strip()
 
-        # If visible_li shorter than expected, fail fast
         if n >= len(visible_li):
             logger.error(f"Index {n} out of range for visible_li (len={len(visible_li)})")
             return False
@@ -155,7 +154,7 @@ def process_rto(driver, wait, visible_li, n, options_name, vehicle_type, downloa
         rto_dropdown = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="selectedRto"]/div[3]')))
         rto_dropdown.click()
         time.sleep(1)
-        # Select by id because the menu uses ids like selectedRto_1, selectedRto_2,...
+        
         rto_option = wait.until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="selectedRto_{n}"]')))
         rto_option.click()
         logger.info(f"✅ Selected RTO {n}")
@@ -208,14 +207,16 @@ def process_rto(driver, wait, visible_li, n, options_name, vehicle_type, downloa
         wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/form/div[2]/div/div/div[3]/div/div[1]/div[1]/span/button'))).click()
         time.sleep(1)
 
-        # Click download until file appears
         retry_count = 0
         while True:
             retry_count += 1
             wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/form/div[2]/div/div/div[3]/div/div[2]/div/div/div[1]/div[1]/a/img'))).click()
             logger.info(f"📥 Download triggered (attempt {retry_count})")
             time.sleep(2)
-
+            if retry_count > 10:
+                logger.error(f"❌ Failed to download Excel file after {retry_count} attempts")
+                driver.quit()
+                return False
             success = download_rename(rto_name, vehicle_type, download_dir, logger)
             if success:
                 break
@@ -224,6 +225,7 @@ def process_rto(driver, wait, visible_li, n, options_name, vehicle_type, downloa
 
     except Exception as e:
         logger.error(f"❌ Error at RTO {n}: {e}")
+        driver.quit()
         return False
 
 
@@ -364,12 +366,10 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
                     success = process_rto(driver, wait, visible_li, n, xpath, vehicle_type, download_dir, logger)
                     if not success:
                         failed_rtos.append((n, vehicle_type, xpath))
-                    # increment only after an attempt (success or failure recorded)
                     n += 1
                     time.sleep(1)
 
                 except Exception as e:
-                    # Unexpected exception - attempt a restart and retry same index
                     logger.error(f"⚠️ Unexpected error processing RTO {n}: {e}")
                     try:
                         driver.quit()
@@ -546,7 +546,7 @@ def main():
         run_rename_check(INPUT_FOLDER)
         consolidate_rto_files(INPUT_FOLDER, OUTPUT_CSV)
         delta_main()
-        logger.info("✅ Post-processing completed successfully")
+        # logger.info("✅ Post-processing completed successfully")
     except Exception as e:
         logger.error(f"❌ Error during post-processing: {e}")
 

@@ -45,37 +45,7 @@ if %hour_num% LSS 6 (
 echo [INFO] Time check passed (after 6:00 AM)
 echo.
 
-@REM REM Check if today's folder already exists
-@REM REM Use Python to get the correct date format (YYYY-MM-DD)
-@REM for /f "delims=" %%i in ('python -c "import time; print(time.strftime('%%Y-%%m-%%d'))"') do set today_date=%%i
-@REM set "today_folder=%today_date%_RTO_Files"
-@REM set "downloads_path=%USERPROFILE%\Downloads\%today_folder%"
 
-@REM echo [INFO] Checking for existing folder: %today_folder%
-@REM echo [INFO] Full path: %downloads_path%
-@REM echo.
-
-@REM if exist "%downloads_path%" (
-@REM     echo ========================================
-@REM     echo   FOLDER ALREADY EXISTS
-@REM     echo ========================================
-@REM     echo [WARNING] Today's RTO folder already exists:
-@REM     echo [PATH] %downloads_path%
-@REM     echo.
-@REM     echo [INFO] This indicates data collection has already been completed for today.
-@REM     echo.
-@REM     echo If you want to rerun this script:
-@REM     echo   1. Delete the folder: %today_folder%
-@REM     echo   2. Run this BAT file again manually
-@REM     echo.
-@REM     pause
-@REM     exit /b 0
-@REM )
-
-@REM echo [INFO] Folder check passed (no existing folder for today)
-@REM echo.
-
-REM Check if Python is installed
 python --version >nul 2>&1
 if errorlevel 1 (
     echo [ERROR] Python is not installed or not in PATH
@@ -102,23 +72,13 @@ set /a retry_count=0
 set /a retry_count+=1
 echo [INFO] Checking internet connectivity... (Attempt %retry_count%)
 
-REM Try ping with shorter timeout
-ping -n 1 -w 1000 8.8.8.8 >nul 2>&1
+REM NOTE:
+REM - 'ping' (ICMP) is frequently blocked/throttled on some networks, causing false "no internet".
+REM - Use a quick HTTPS check (plus TCP+DNS fallback) for more reliable detection.
+ powershell -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference='SilentlyContinue'; $ok=$false; try { $p=@{ TimeoutSec=5; Uri='https://www.msftconnecttest.com/connecttest.txt'; ErrorAction='Stop' }; if((Get-Command Invoke-WebRequest).Parameters.ContainsKey('UseBasicParsing')){ $p.UseBasicParsing=$true }; $r=Invoke-WebRequest @p; if($r.StatusCode -ge 200 -and $r.StatusCode -lt 400){$ok=$true} } catch {}; if(-not $ok){ try { if(Test-NetConnection -ComputerName '1.1.1.1' -Port 443 -InformationLevel Quiet){$ok=$true} } catch {} }; if(-not $ok){ try { [void][System.Net.Dns]::GetHostEntry('www.google.com'); $ok=$true } catch {} }; if($ok){ exit 0 } else { exit 1 }" >nul 2>&1
 if errorlevel 1 (
-    REM If Google DNS fails, try Cloudflare DNS
-    ping -n 1 -w 1000 1.1.1.1 >nul 2>&1
-    if errorlevel 1 (
-        echo [WARNING] No internet connection detected
-        echo [INFO] Waiting 3 seconds before retry...
-        timeout /t 3 /nobreak >nul
-        goto CHECK_INTERNET
-    )
-)
-
-REM Verify DNS resolution
-ping -n 1 -w 2000 www.google.com >nul 2>&1
-if errorlevel 1 (
-    echo [WARNING] DNS resolution failed, retrying...
+    echo [WARNING] No internet connection detected
+    echo [INFO] Waiting 3 seconds before retry...
     timeout /t 3 /nobreak >nul
     goto CHECK_INTERNET
 )

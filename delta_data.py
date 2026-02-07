@@ -3,8 +3,8 @@ from pathlib import Path
 from datetime import datetime
 
 # --- FOLDERS / FILES ---
-CUMULATIVE_DIR = Path("cumulative_folder")   # folder where daily cumulative CSVs are dropped
-DELTA_OUT_DIR  = Path("delta_folder")       # folder where we store per-day delta CSV
+CUMULATIVE_DIR = Path("cumulative_folder")   
+DELTA_OUT_DIR  = Path("delta_folder")       
 FINAL_FILE     = "final_master.csv"     
 PREPROCESS_MASTER_FILE     = "master_preprocessed.csv"        
 
@@ -173,6 +173,9 @@ def main():
 
     old_path, new_path = pick_old_and_new(CUMULATIVE_DIR)
 
+
+
+
     if old_path is None:
         print(f"Only one CSV found ({new_path.name}) → skipping subtraction, appending raw file.")
         new_df = pd.read_csv(new_path)
@@ -196,9 +199,8 @@ def main():
     drop_today_rows(FINAL_FILE)
     append_to_final(FINAL_FILE, out_df)
     preprocess_master()
-    # upload_and_email(delta_csv_path=out_file,cumulative_csv_path=new_path,master_csv_path=PREPROCESS_MASTER_FILE, recipient_email ="sanjeevan@axtr.in,rauf@axtr.in,sanjeevanmanoranjan@gmail.com,alphaf.qcl@tatamotors.com,karthik.krishnan@tatamotors.com")
-    # upload_and_email(delta_csv_path=out_file,cumulative_csv_path=new_path,master_csv_path=PREPROCESS_MASTER_FILE, recipient_email ="sanjeevan@axtr.in,alphaf.qcl@tatamotors.com")
-
+    upload_and_email(delta_csv_path=out_file,cumulative_csv_path=new_path,master_csv_path=PREPROCESS_MASTER_FILE, recipient_email ="sanjeevan@axtr.in,rauf@axtr.in,sanjeevanmanoranjan@gmail.com,alphaf.qcl@tatamotors.com,karthik.krishnan@tatamotors.com")
+    
 
 if __name__ == "__main__":
     main()

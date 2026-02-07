@@ -1,6 +1,8 @@
 import pandas as pd
 
 city_mapping = {
+    "THIRUBUVANAI(VILLIANUR)":"Pondicherry",
+    "NATIONALISED SECTOR(TVPM) RTO":"",
   "ADOOR SRTO": "Pathanamthitta",
   "ALANGUDI UO": "Thanjavur",
   "ALANGULAM UO": "Tirunelveli",
@@ -311,6 +313,8 @@ city_mapping = {
 }
 
 rto_ao_mapping = {
+        "THIRUBUVANAI(VILLIANUR)":"RO South2",
+    "NATIONALISED SECTOR(TVPM) RTO":"",
   "ADOOR SRTO": "RO South3",
   "ALANGUDI UO": "Thanjavur",
   "ALANGULAM UO": "Tirunelveli",
@@ -620,6 +624,317 @@ rto_ao_mapping = {
   "YANAM": "RO South2"
 }
 
+cluster_mapping = {
+    "THIRUBUVANAI(VILLIANUR)":"Pondicherry",
+    "NATIONALISED SECTOR(TVPM) RTO":"",
+  "ATHANI ARTO": "Belgaum",
+  "BAGALKOT  RTO": "Bijapur",
+  "BANTWALA ARTO": "Mangalore",
+  "BASAVAKALYAN ARTO": "Kalaburagi",
+  "BELLARY  RTO": "Hospet",
+  "BENGALURU CENTRAL  RTO": "Bangalore",
+  "BENGALURU EAST  RTO": "Bangalore",
+  "BENGALURU NORTH  RTO": "Bangalore",
+  "BENGALURU SOUTH  RTO": "Bangalore",
+  "BENGALURU WEST  RTO": "Bangalore",
+  "BHALKI  ARTO": "Kalaburagi",
+  "BIDAR  RTO": "Kalaburagi",
+  "BIJAPUR  RTO": "Bijapur",
+  "CHAMARAJANAGAR  RTO": "Mysore",
+  "CHANDAPURA, BENGALURU RTO": "Bangalore",
+  "CHICKABALLAPUR  RTO": "Tumkur",
+  "CHIKAMANGLUR RTO": "Mangalore",
+  "CHIKKODI  RTO": "Belgaum",
+  "CHITRADURGA  RTO": "Tumkur",
+  "DAVANAGERE  RTO": "Shimoga",
+  "DEVANAHALLI  ARTO": "Bangalore",
+  "DHARWAD EAST RTO": "Hubli",
+  "DHARWAD WEST RTO": "Hubli",
+  "ELECTRONIC CITY  RTO": "Bangalore",
+  "GADAG  RTO": "Hubli",
+  "GOKAK  ARTO": "Belgaum",
+  "HASSAN  RTO": "Mangalore",
+  "HAVERI  RTO": "Hubli",
+  "HONNAVAR  ARTO": "Hubli",
+  "HOSPET  RTO": "Hospet",
+  "HUNSUR  ARTO": "Mysore",
+  "JAMKHANDI  ARTO": "Bijapur",
+  "JNANABHARATHI  RTO": "Bangalore",
+  "K G F  ARTO": "Bangalore",
+  "KALABURAGI  RTO": "Kalaburagi",
+  "KARWAR  RTO": "Hubli",
+  "KOLAR  RTO": "Bangalore",
+  "KOPPAL  RTO": "Hospet",
+  "KRISHNARAJAPURAM  RTO": "Bangalore",
+  "MADIKERI  RTO": "Mysore",
+  "MANDYA  RTO": "Mysore",
+  "MANGALORE  RTO": "Mangalore",
+  "MYSURU WEST  RTO": "Mysore",
+  "NAGAMANGALA  RTO": "Mysore",
+  "NELAMANGALA  RTO": "Bangalore",
+  "PUTTUR  RTO": "Mangalore",
+  "RAICHUR  RTO": "Hospet",
+  "RAMANAGAR  RTO": "Bangalore",
+  "RAMDURGA ARTO": "Belgaum",
+  "RANIBENNUR ARTO": "Hubli",
+  "REGIONAL TRANSPORT OFFICE BELAGAVI": "Belgaum",
+  "SAGAR  ARTO": "Shimoga",
+  "SAKALESHPURA  ARTO": "Mangalore",
+  "SHIMOGA  RTO": "Shimoga",
+  "SIRSI  RTO": "Hubli",
+  "TARIKERE, CHIKKAMAGALURU ARTO": "Mangalore",
+  "TIPTUR  ARTO": "Tumkur",
+  "TUMKUR  RTO": "Tumkur",
+  "UDUPI  RTO": "Mangalore",
+  "YADGIRI  RTO": "Kalaburagi",
+  "YALAHANKA  RTO": "Bangalore",
+  "ALUVA SRTO": "Ernakulam",
+  "CHALAKKUDY SRTO": "Thrissur",
+  "CHANGANACHERRY SRTO": "Kottayam",
+  "CHENGANNUR SRTO": "Alappuzha",
+  "CHERTHALA SRTO": "Alappuzha",
+  "ERNAKULAM RTO": "Ernakulam",
+  "IDUKKI RTO": "Ernakulam",
+  "IRINJALAKUDA SRTO": "Thrissur",
+  "IRITTY SRTO": "Kannur",
+  "KAYAMKULAM SRTO": "Alappuzha",
+  "KAZHAKUTTOM SRTO": "Thiruvananthapuram",
+  "KODUNGALLUR SRTO": "Thrissur",
+  "KOILANDY SRTO": "Kozhikode",
+  "KONDOTTY SRTO": "Malappuram",
+  "KONNI SRTO": "Kottayam",
+  "KOTTARAKKARA SRTO": "Kollam",
+  "KOTTAYAM RTO": "Kottayam",
+  "KOZHIKODE RTO": "Kozhikode",
+  "MANANTHAVADY SRTO": "Kozhikode",
+  "MANNARGHAT SRTO": "Palakkad",
+  "MATTANCHERRY SRTO": "Ernakulam",
+  "MAVELIKKARA SRTO": "Alappuzha",
+  "MUVATTUPUZHA RTO": "Ernakulam",
+  "NANMANDA SRTO": "Kozhikode",
+  "NEDUMANGADU SRTO": "Thiruvananthapuram",
+  "NILAMBUR SRTO": "Malappuram",
+  "NORTH PARUR SRTO": "Ernakulam",
+  "PATTAMBI SRTO": "Palakkad",
+  "PAYYANNUR SRTO": "Kannur",
+  "PONNANI SRTO": "Malappuram",
+  "RANNI SRTO": "Kottayam",
+  "SULTHANBATHERY SRTO": "Kozhikode",
+  "THALASSERY SRTO": "Kannur",
+  "THODUPUZHA SRTO": "Ernakulam",
+  "THRISSUR RTO": "Thrissur",
+  "TRIPUNITHURA SRTO": "Ernakulam",
+  "TRIVANDRUM RTO": "Thiruvananthapuram",
+  "UDUMBANCHOLA SRTO": "Ernakulam",
+  "VADAKARA RTO": "Kozhikode",
+  "VAIKOM SRTO": "Kottayam",
+  "WADAKKANCHERRY SRTO": "Thrissur",
+  "WAYANAD RTO": "Kozhikode",
+  "BAHOUR": "Pondicherry",
+  "KARAIKAL": "Pondicherry",
+  "MAHE": "Pondicherry",
+  "OULGARET": "Pondicherry",
+  "PUDUCHERRY": "Pondicherry",
+  "VILLIANUR": "Pondicherry",
+  "ALANGULAM UO": "Madurai AO",
+  "AMBATTUR RTO": "Chennai",
+  "ARAKKONAM UO": "Vellore",
+  "ARANI RTO": "Vellore",
+  "ARANTHANGI UO": "Thanjavur",
+  "ARIYALUR RTO": "Tiruchirappalli",
+  "ATTUR RTO": "Salem",
+  "AVINASHI UO": "Coimbatore",
+  "CHENGALPATTU RTO": "Chennai",
+  "CHENNAI (CENTRAL) RTO": "Chennai",
+  "CHENNAI (SOUTH) RTO": "Chennai",
+  "CHENNAI (SOUTH-WEST) RTO": "Chennai",
+  "CHENNAI (WEST) RTO": "Chennai",
+  "CHEYYAR UO": "Vellore",
+  "CHIDAMBARAM RTO": "Cuddalore",
+  "COIMBATORE (CENTRAL) RTO": "Coimbatore",
+  "COIMBATORE (NORTH) RTO": "Coimbatore",
+  "COIMBATORE (SOUTH) RTO": "Coimbatore",
+  "COIMBATORE (WEST) RTO": "Coimbatore",
+  "CUDDALORE RTO": "Cuddalore",
+  "DHARMAPURI RTO": "Krishnagiri",
+  "ERODE (WEST) RTO": "Erode",
+  "ERODE RTO": "Erode",
+  "GINGEE UO": "Cuddalore",
+  "GOPICHETTIPALAYAM RTO": "Erode",
+  "GUDALORE UO": "Coimbatore",
+  "HOSUR RTO": "Krishnagiri",
+  "KALLAKURICHI RTO": "Cuddalore",
+  "KANCHEEPURAM RTO": "Vellore",
+  "KANGEYAM UO": "Coimbatore",
+  "KARAIKUDI UO": "Madurai",
+  "KOVILPATTI RTO": "Madurai AO",
+  "KULITHALI UO": "Salem",
+  "KUNDRATHUR RTO": "Chennai",
+  "MADURAI (CENTRAL) RTO": "Madurai",
+  "MADURAI (NORTH) RTO": "Madurai",
+  "MADURANTAGAM UO": "Chennai",
+  "MANMANGALAM UO": "Salem",
+  "MANNARGUDI UO": "Thanjavur",
+  "MARTHANDAM RTO": "Tirunelveli",
+  "MAYILADUTHURAI RTO": "Thanjavur",
+  "MEENAMBAKKAM RTO": "Chennai",
+  "METTUPALAYAM RTO": "Coimbatore",
+  "MUSURI UO": "Tiruchirappalli",
+  "NAGERCOIL RTO": "Tirunelveli",
+  "NAMAKKAL (NORTH) RTO": "Salem",
+  "NAMAKKAL (SOUTH) RTO": "Salem",
+  "NEYVELI UO": "Cuddalore",
+  "OMALURE UO": "Salem",
+  "OOTY RTO": "Coimbatore",
+  "PALACODE UO": "Krishnagiri",
+  "PANRUTI UO": "Cuddalore",
+  "PARAMATHI VELLURE UO": "Salem",
+  "PERAMBALUR RTO": "Tiruchirappalli",
+  "PERUNDURAI RTO": "Erode",
+  "POLLACHI RTO": "Coimbatore",
+  "POONAMALLEE RTO": "Chennai",
+  "PUDUKOTTAI RTO": "Thanjavur",
+  "RAJAPALAYAM UO": "Madurai",
+  "RAMANATHAPURAM RTO": "Madurai",
+  "RANIPET RTO": "Vellore",
+  "RASIPURAM UO": "Salem",
+  "REDHILLS RTO": "Chennai",
+  "RTO CHENNAI (NORTH WEST)": "Chennai",
+  "SALEM (EAST) RTO": "Salem",
+  "SALEM (SOUTH) RTO": "Salem",
+  "SALEM (WEST) RTO": "Salem",
+  "SANKAGIRI RTO": "Salem",
+  "SANKARANKOVIL RTO": "Madurai AO",
+  "SHOLINGANALLUR RTO": "Chennai",
+  "SIRKALI UO": "Thanjavur",
+  "SIVAGANGAI RTO": "Madurai",
+  "SRIPERUMBUDUR RTO": "Chennai",
+  "SULUR UO": "Coimbatore",
+  "TAMBARAM RTO": "Chennai",
+  "TENKASI RTO": "Madurai AO",
+  "THANJAVUR RTO": "Thanjavur",
+  "THIRUCHENDUR RTO": "Madurai AO",
+  "THIRUKALUKUNTRAM UO": "Chennai",
+  "THOOTHUKUDI RTO": "Madurai AO",
+  "TIRUCHENGODE RTO": "Salem",
+  "TIRUCHI RTO": "Tiruchirappalli",
+  "TIRUNELVELI RTO": "Madurai AO",
+  "TIRUPPUR (NORTH) RTO": "Coimbatore",
+  "TIRUPPUR (SOUTH) RTO": "Coimbatore",
+  "TIRUVANNAMALAI RTO": "Vellore",
+  "TIRUVERANBUR UO": "Tiruchirappalli",
+  "ULUNDURPET RTO": "Cuddalore",
+  "VALLIYUR UO": "Madurai AO",
+  "VANIYAMBADI RTO": "Vellore",
+  "VELLORE RTO": "Vellore",
+  "VILUPPURAM RTO": "Cuddalore",
+  "VIRUDHACHALAM UO": "Cuddalore",
+  "BAILHONGAL  RTO": "Belgaum",
+  "CHINTAMANI ARTO": "Tumkur",
+  "DANDELI ARTO": "Hubli",
+  "MYSURU  EAST  RTO": "Mysore",
+  "ANGAMALI SRTO": "Ernakulam",
+  "ATTINGAL RTO": "Thiruvananthapuram",
+  "GURUVAYUR SRTO": "Thrissur",
+  "KANHANGAD SRTO": "Kannur",
+  "KANNUR RTO": "Kannur",
+  "KASARGODE RTO": "Kannur",
+  "KOLLAM RTO": "Kollam",
+  "KOTHAMANGALAM SRTO": "Ernakulam",
+  "KUTTANADU SRTO": "Alappuzha",
+  "MALAPPURAM RTO": "Malappuram",
+  "MALLAPPALLY SRTO": "Kottayam",
+  "NEYYATTINKARA SRTO": "Thiruvananthapuram",
+  "OTTAPPALAM SRTO": "Palakkad",
+  "PALAI SRTO": "Kottayam",
+  "PARASSALA SRTO": "Thiruvananthapuram",
+  "PERAMBRA SRTO": "Kozhikode",
+  "PERINTHALMANNA SRTO": "Malappuram",
+  "PERUMBAVUR SRTO": "Ernakulam",
+  "RAMANATTUKARA (FEROKE) SRTO": "Kozhikode",
+  "THALIPARAMBA SRTO": "Kannur",
+  "THIRUR SRTO": "Malappuram",
+  "THIRUVALLA SRTO": "Kottayam",
+  "VARKALA SRTO": "Thiruvananthapuram",
+  "ALANGUDI UO": "Thanjavur",
+  "AMBASAMUTHIRAM UO": "Madurai AO",
+  "ARUPPUKOTTAI UO": "Madurai",
+  "BATLAGUNDU UO": "Tiruchirappalli",
+  "BHAVANI UO": "Erode",
+  "CHENNAI (NORTH) RTO": "Chennai",
+  "CHENNAI (NORTH-EAST) RTO": "Chennai",
+  "CHENNAI (SOUTH-EAST) RTO": "Chennai",
+  "DHARAPURAM RTO": "Coimbatore",
+  "DINDIGUL RTO": "Tiruchirappalli",
+  "GUDIYATHAM UO": "Vellore",
+  "GUMMIDIPOONDI UO": "Chennai",
+  "HARUR UO": "Krishnagiri",
+  "KARUR RTO": "Salem",
+  "KUMBAKONAM RTO": "Thanjavur",
+  "MADURAI (SOUTH) RTO": "Madurai",
+  "MELUR UO": "Madurai",
+  "METTUR RTO": "Salem",
+  "PALANI RTO": "Tiruchirappalli",
+  "PARAMAKUDI UO": "Madurai",
+  "PATTUKOTTAI UNIT OFFICE": "Thanjavur",
+  "SATHYAMANGALAM UO": "Erode",
+  "SIVAKASI RTO": "Madurai",
+  "SRIRANGAM RTO": "Tiruchirappalli",
+  "SRIVILLIPUTHUR RTO": "Madurai",
+  "THENI RTO": "Madurai",
+  "THIRUPATTUR RTO": "Vellore",
+  "THIRUTTANI UO": "Chennai",
+  "THURAIYUR UO": "Tiruchirappalli",
+  "TINDIVANAM RTO": "Cuddalore",
+  "TIRUCHI(EAST) RTO": "Tiruchirappalli",
+  "TIRUVALLUR RTO": "Chennai",
+  "TIRUVARUR RTO": "Thanjavur",
+  "UDUMALPET RTO": "Coimbatore",
+  "VALAPPADI UO": "Salem",
+  "ADOOR SRTO": "Kottayam",
+  "ALAPPUZHA RTO": "Alappuzha",
+  "ALATHUR SRTO": "Palakkad",
+  "CHADAYAMANGALA SRTO": "Kollam",
+  "CHITTUR SRTO": "Palakkad",
+  "KANJIRAPPALLY SRTO": "Kottayam",
+  "KARUNAGAPPALLY SRTO": "Kollam",
+  "KATTAKADA SRTO": "Thiruvananthapuram",
+  "KODUVALLY SRTO": "Kozhikode",
+  "KUNNATHUR SRTO": "Kollam",
+  "PATHANAMTHITTA RTO": "Kottayam",
+  "PATHANAPURAM SRTO": "Kollam",
+  "PUNALUR SRTO": "Kollam",
+  "THIRURANGADI SRTO": "Malappuram",
+  "THRIPRAYAR SRTO": "Thrissur",
+  "UZHAVOOR SRTO": "Kottayam",
+  "VELLARIKUNDU SRTO": "Kannur",
+  "ARAVAKURICHI UO": "Salem",
+  "CHENNAI (EAST) RTO": "Chennai",
+  "ILLUPPUR UO": "Thanjavur",
+  "KRISHNAGIRI RTO": "Krishnagiri",
+  "KUMARAPALAYAM RTO": "Salem",
+  "LALKUDI UO": "Tiruchirappalli",
+  "NAGAPATTINAM RTO": "Thanjavur",
+  "UTHAMAPALAYAM UO": "Madurai",
+  "VIRUDHUNAGAR RTO": "Madurai",
+  "MADHUGIRI, TUMAKURU ARTO": "Tumkur",
+  "PALAKKAD RTO": "Palakkad",
+  "VANDIPERIYAR SRTO": "Ernakulam",
+  "AMBUR UO": "Vellore",
+  "MANAPARAI UO": "Tiruchirappalli",
+  "NATHAM UO": "Tiruchirappalli",
+  "ODDANCHATRAM  UO": "Tiruchirappalli",
+  "THIRUTHURAIPOONDI UO": "Thanjavur",
+  "VADIPATTI UO": "Madurai",
+  "VALPARAI UO": "Coimbatore",
+  "DEVIKULAM SRTO": "Ernakulam",
+  "YANAM": "Pondicherry",
+  "THIRUMANGALAM  UO": "Madurai",
+  "VEDACHANDUR UO": "Tiruchirappalli",
+  "USILAMPATTI UO": "Madurai",
+  "STU AND AUTORIKSHAW,  SHANTHINAGAR RTO": "Bangalore"
+}
+
 maker_short_mapping = {
   "MARUTI SUZUKI INDIA LTD": "Maruti",
   "HONDA CARS INDIA LTD": "Honda",
@@ -704,26 +1019,27 @@ def get_financial_quarter(date):
         return "Q4"
 def preprocess_master():
     df = pd.read_csv("final_master.csv")
-    # df = pd.read_csv("BeforeTest.csv")
     df = df.drop(columns=["scrape_timestamp"], errors="ignore")
     
-    # Track initial total - we'll calculate it from fuel columns after they're identified
-    # This ensures we're comparing the same thing (fuel columns sum)
     initial_total = None
 
 
     df = df.rename(columns={
         "Maker": "OEM",
-        "district": "cluster",
         "timestamp": "Date"
     })
+    df = df.drop(columns=["district"], errors="ignore")
 
-    if "cluster" not in df.columns:
-        district_col = next((c for c in df.columns if c.strip().lower() == "district"), None)
-        if district_col:
-            df["cluster"] = df[district_col]
-        else:
-            df["cluster"] = pd.NA
+    df["cluster"] = df["RTO"].map(cluster_mapping)
+    df["cluster"] = df["cluster"].where(df["cluster"].notna(), None)
+    missing_cluster_rtos = (
+        df.loc[df["cluster"].isna(), "RTO"]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+    if missing_cluster_rtos:
+        print("Missing cluster mapping for RTOs:", missing_cluster_rtos)
 
 
     df["Date"] = pd.to_datetime(df["Date"], dayfirst=True, format="mixed",errors="raise")
@@ -731,7 +1047,7 @@ def preprocess_master():
     df["AO"] = df["RTO"].map(rto_ao_mapping)
     df["maker_short"] = df["OEM"].map(maker_short_mapping)
     
-    # Check for missing mappings
+
     missing_ao_count = df["AO"].isna().sum()
     if missing_ao_count > 0:
         print(f"Warning: {missing_ao_count} rows have missing AO mapping")
@@ -743,9 +1059,6 @@ def preprocess_master():
     ]
 
     fuel_cols = [c for c in df.columns if c not in id_cols and c != "TOTAL"]
-    
-    # Calculate initial total from fuel columns sum (before melt)
-    # This is the actual data we'll be processing
     initial_total = df[fuel_cols].sum().sum()
 
 
@@ -757,7 +1070,7 @@ def preprocess_master():
     )
 
     out["Regn Vol"] = pd.to_numeric(out["Regn Vol"], errors="coerce").fillna(0)
-    out = out[out["Regn Vol"] > 0]
+    out = out[out["Regn Vol"] != 0]
     
     total_after_melt = out["Regn Vol"].sum()
 

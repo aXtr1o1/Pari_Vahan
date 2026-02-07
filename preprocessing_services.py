@@ -2,10 +2,10 @@ import pandas as pd
 import os
 from datetime import date
 import re
-import json
 from datetime import date, timedelta
+from preprocess import cluster_mapping
+import json
 
-# Load district map
 with open("district.json", "r", encoding="utf-8") as f:
     DISTRICT_MAP = json.load(f)
 
@@ -96,6 +96,7 @@ def process_rto_file(filepath):
         df.insert(5, 'vehicle_type', file_info['vehicle_type'])
         district = DISTRICT_MAP.get(file_info['rto'].upper(), "Unknown")
         df.insert(6, 'district', district)
+
         
         # Clean up maker names (strip whitespace)
         df['Maker'] = df['Maker'].str.strip()
@@ -149,5 +150,5 @@ def consolidate_rto_files(input_folder, output_csv):
 
 
 if __name__ == "__main__":
-    consolidate_rto_files(input_folder="C:/Users/sanje_3wfdh8z/Downloads/2026-01-25_RTO_Files", output_csv="cumulative_folder/new_2026-01-25.csv")
+    consolidate_rto_files(input_folder="C:/Users/sanje_3wfdh8z/Downloads/2026-02-05_RTO_Files", output_csv="cumulative_folder/2026-02-05.csv")
     print("\nDone!")
