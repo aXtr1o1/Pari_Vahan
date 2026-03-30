@@ -150,5 +150,5 @@ def consolidate_rto_files(input_folder, output_csv):
 
 
 if __name__ == "__main__":
-    consolidate_rto_files(input_folder="C:/Users/sanje_3wfdh8z/Downloads/2026-02-05_RTO_Files", output_csv="cumulative_folder/2026-02-05.csv")
+    consolidate_rto_files(input_folder="C:/Users/sanje_3wfdh8z/Downloads/2026-03-25_RTO_Files_13-00-04", output_csv="cumulative_folder/2026-03-25.csv")
     print("\nDone!")

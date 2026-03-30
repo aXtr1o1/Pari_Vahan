@@ -41,7 +41,7 @@ STATES = {
     "Karnataka": "/html/body/div[3]/div/ul/li[17]",
     "Kerala": "/html/body/div[3]/div/ul/li[18]",
     "Puducherry": "/html/body/div[3]/div/ul/li[29]",
-    "Tamil_Nadu": "/html/body/div[3]/div/ul/li[32]",
+    "Tamil_Nadu": "/html/body/div[3]/div/ul/li[33]",
 }
 
 OPTIONS = {
@@ -81,7 +81,7 @@ def restart_driver(state_name, download_dir, logger, headless=False):
     chrome_options = Options()
     chrome_options.add_argument("--start-maximized")
     chrome_options.add_argument("--disable-notifications")
-    chrome_options.add_argument("--headless=new")
+    #chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--window-size=1920,1080")
     prefs = {"download.default_directory": download_dir}
     chrome_options.add_experimental_option("prefs", prefs)
@@ -153,59 +153,59 @@ def process_rto(driver, wait, visible_li, n, options_name, vehicle_type, downloa
         # Select RTO
         rto_dropdown = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="selectedRto"]/div[3]')))
         rto_dropdown.click()
-        time.sleep(1)
+        time.sleep(3)
         
         rto_option = wait.until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="selectedRto_{n}"]')))
         rto_option.click()
         logger.info(f"✅ Selected RTO {n}")
-        time.sleep(1)
+        time.sleep(3)
 
         # y-axis → Maker
         wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="yaxisVar"]/div[3]'))).click()
-        time.sleep(0.5)
+        time.sleep(1)
         wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="yaxisVar_4"]'))).click()
-        time.sleep(0.5)
+        time.sleep(1)
 
         # x-axis → Fuel
         wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="xaxisVar"]/div[3]'))).click()
-        time.sleep(0.5)
+        time.sleep(1)
         wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="xaxisVar_3"]'))).click()
-        time.sleep(0.5)
+        time.sleep(1)
         # Year dropdown - only if new year
         if new_year:
             wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="selectedYear"]/div[3]/span'))).click()
-            time.sleep(0.5)
+            time.sleep(1)
             wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="selectedYear_3"]'))).click()
-            time.sleep(0.5)
+            time.sleep(1)
 
         # Refresh chart
         wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/form/div[2]/div/div/div[1]/div[3]/div[3]/div/button'))).click()
-        time.sleep(1)
+        time.sleep(3)
 
         m = month
         print(f"Current month: {m}")
         wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="groupingTable:selectMonth"]/div[3]'))).click()
-        time.sleep(0.5)
+        time.sleep(1)
         wait.until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="groupingTable:selectMonth_{m}"]'))).click()
-        time.sleep(0.5)
+        time.sleep(1)
 
 
 
         if vehicle_type=="motor_cab":
             wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="VhClass"]/tbody/tr[39]/td/label'))).click()
-            time.sleep(0.5)
+            time.sleep(1)
             wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="VhClass"]/tbody/tr[51]/td/label'))).click()
-            time.sleep(0.5)
+            time.sleep(1)
             logger.info(f"selecting Luxury Cab & Maxi Cab")
 
         # Select vehicle class
         logger.info(f"Selecting vehicle class: {vehicle_type}")
         wait.until(EC.element_to_be_clickable((By.XPATH, options_name))).click()
-        time.sleep(0.5)
+        time.sleep(1)
 
         # Filter apply / refresh
         wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/form/div[2]/div/div/div[3]/div/div[1]/div[1]/span/button'))).click()
-        time.sleep(1)
+        time.sleep(3)
 
         retry_count = 0
         while True:
@@ -244,7 +244,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
     
     chrome_options = Options()
     chrome_options.add_argument("--start-maximized")
-    chrome_options.add_argument("--headless=new") 
+    #chrome_options.add_argument("--headless=new") 
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("detach", False)
     prefs = {"download.default_directory": download_dir}
@@ -258,7 +258,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
 
     try:
         driver.get(URL)
-        time.sleep(3)
+        time.sleep(4)
 
         # Open filter
         wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="filterLayout-toggler"]/span/a'))).click()
@@ -269,7 +269,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
         time.sleep(1)
         wait.until(EC.element_to_be_clickable((By.XPATH, state_xpath))).click()
         logger.info(f"✅ Selected state: {state_name}")
-        time.sleep(1)
+        time.sleep(3)
 
         # Get RTO list
         rto_dropdown = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="selectedRto"]/div[3]')))
@@ -325,7 +325,7 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
                                                               '//*[@id="masterLayout_formlogin"]/div[2]/div/div/div[1]/div[2]/div[3]'))).click()
                         time.sleep(1)
                         wait.until(EC.element_to_be_clickable((By.XPATH, state_xpath))).click()
-                        time.sleep(2)
+                        time.sleep(1)
                         logger.info("🔁 State reloaded successfully after crash")
 
                         # RELOAD RTO LIST (important: visible_li must point to elements from this driver)
@@ -349,16 +349,16 @@ def process_state(state_name, state_xpath, start_index=1, shared_dict=None):
                         try:
                             m = month
                             wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="groupingTable:selectMonth"]/div[3]'))).click()
-                            time.sleep(0.5)
+                            time.sleep(1)
                             wait.until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="groupingTable:selectMonth_{m}"]'))).click()
-                            time.sleep(0.5)
+                            time.sleep(1)
                         except Exception:
                             # not fatal - process_rto will attempt again
                             logger.info("Could not pre-set month after restart; process_rto will set it.")
 
                     except Exception as e:
                         logger.error(f"Failed to re-initialize after restart: {e}")
-                        time.sleep(15)  # Wait before next attempt
+                        time.sleep(8)  # Wait before next attempt
                         continue
                     continue
 
@@ -546,7 +546,7 @@ def main():
         run_rename_check(INPUT_FOLDER)
         consolidate_rto_files(INPUT_FOLDER, OUTPUT_CSV)
         delta_main()
-        # logger.info("✅ Post-processing completed successfully")
+        logger.info("✅ Post-processing completed successfully")
     except Exception as e:
         logger.error(f"❌ Error during post-processing: {e}")
 

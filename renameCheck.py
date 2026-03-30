@@ -75,15 +75,7 @@ def split_filename(base_name: str):
 
 
 def get_available_path(path: str) -> str:
-    if not os.path.exists(path):
-        return path
-
-    root, ext = os.path.splitext(path)
-    for i in range(1, 1000):
-        candidate = f"{root} (fix-{i}){ext}"
-        if not os.path.exists(candidate):
-            return candidate
-
+    """Return the path as-is; caller will replace any existing file."""
     return path
 
 
@@ -118,20 +110,14 @@ def check_and_fix_file(file_path: str, dry_run: bool):
             "detail": f"Header matches ({rto_from_header})",
         }
 
-    date_match = re.search(r"\([^)]*\)", rto_from_name)
-    if date_match:
-        date_suffix = f" {date_match.group(0)}"
-    elif is_report_table:
-        today = datetime.now()
-        date_suffix = f"( {today.strftime('%d-%b-%Y').upper()} )"
-        date_suffix = f" {date_suffix}"
-    else:
-        date_suffix = ""
-    new_base = f"{rto_from_header}{date_suffix}_{vehicle_type}".strip("_")
+    # No date suffix: use clean name so duplicates replace instead of (1)/(fix)/date
+    new_base = f"{rto_from_header}_{vehicle_type}".strip("_")
     new_path = os.path.join(os.path.dirname(file_path), f"{new_base}.xlsx")
     new_path = get_available_path(new_path)
 
     if not dry_run:
+        if os.path.exists(new_path) and os.path.abspath(new_path) != os.path.abspath(file_path):
+            os.remove(new_path)
         os.rename(file_path, new_path)
 
     return {
