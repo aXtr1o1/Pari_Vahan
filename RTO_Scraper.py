@@ -123,6 +123,175 @@ def download_rename(rto_name, vehicle_type, download_dir, logger):
     return True
 
 from selenium.common.exceptions import NoSuchElementException
+import re
+
+from fix.file_check import (
+    group_targets_by_state,
+    missing_to_rescrape_targets,
+    run_file_check,
+)
+
+MAX_MISSING_RESCRAPE_PASSES = 1
+
+
+def find_rto_index(visible_li, rto_code: str) -> int | None:
+    """Find dropdown index for an RTO code (TN1 does not match TN10)."""
+    code = rto_code.upper()
+    pattern = re.compile(re.escape(code) + r"(?!\d)", re.IGNORECASE)
+
+    for i, li in enumerate(visible_li):
+        text = (li.text or li.get_attribute("textContent") or "")
+        if pattern.search(text):
+            return i
+    return None
+
+
+def rescrape_targets_for_state(state_name, state_xpath, targets, logger):
+    """Re-download only the listed RTO / vehicle-type pairs for one state."""
+    if not targets:
+        return
+
+    logger.info(
+        "Rescraping %s missing file(s) for %s",
+        len(targets),
+        state_name,
+    )
+
+    download_dir = os.path.join(
+        os.path.expanduser("~"), "Downloads", f"{state_name}_rescrape_temp"
+    )
+    os.makedirs(download_dir, exist_ok=True)
+
+    chrome_options = Options()
+    chrome_options.add_argument("--start-maximized")
+    chrome_options.add_argument("--disable-notifications")
+    chrome_options.add_experimental_option("detach", False)
+    prefs = {"download.default_directory": download_dir}
+    chrome_options.add_experimental_option("prefs", prefs)
+
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()), options=chrome_options
+    )
+    wait = WebDriverWait(driver, 25)
+
+    try:
+        driver.get(URL)
+        time.sleep(4)
+
+        wait.until(
+            EC.element_to_be_clickable(
+                (By.XPATH, '//*[@id="filterLayout-toggler"]/span/a')
+            )
+        ).click()
+        time.sleep(1)
+
+        wait.until(
+            EC.element_to_be_clickable(
+                (
+                    By.XPATH,
+                    '//*[@id="masterLayout_formlogin"]/div[2]/div/div/div[1]/div[2]/div[3]',
+                )
+            )
+        ).click()
+        time.sleep(1)
+        wait.until(EC.element_to_be_clickable((By.XPATH, state_xpath))).click()
+        time.sleep(3)
+
+        rto_dropdown = wait.until(
+            EC.element_to_be_clickable((By.XPATH, '//*[@id="selectedRto"]/div[3]'))
+        )
+        rto_dropdown.click()
+        time.sleep(1)
+        wait.until(
+            EC.visibility_of_element_located((By.XPATH, '//*[@id="selectedRto_items"]'))
+        )
+        time.sleep(1)
+        all_li = driver.find_elements(
+            By.XPATH,
+            '//*[@id="selectedRto_items"]//li[contains(@class,"ui-selectonemenu-item") and not(contains(@class,"ui-state-disabled"))]',
+        )
+        visible_li = [li for li in all_li if li.is_displayed()]
+        rto_dropdown.click()
+        time.sleep(2)
+
+        for target in targets:
+            n = find_rto_index(visible_li, target.rto_code)
+            if n is None:
+                logger.error(
+                    "Could not find RTO %s in %s dropdown (%s)",
+                    target.rto_code,
+                    state_name,
+                    target.expected_filename,
+                )
+                continue
+
+            xpath = OPTIONS[target.vehicle_type]
+            logger.info(
+                "Rescrape %s [%s] index=%s (%s)",
+                target.rto_code,
+                target.vehicle_type,
+                n,
+                target.expected_filename,
+            )
+            success = process_rto(
+                driver,
+                wait,
+                visible_li,
+                n,
+                xpath,
+                target.vehicle_type,
+                download_dir,
+                logger,
+            )
+            if not success:
+                logger.error(
+                    "Rescrape failed: %s %s",
+                    target.rto_code,
+                    target.vehicle_type,
+                )
+            time.sleep(1)
+
+    except Exception as e:
+        logger.error("Rescrape session error for %s: %s", state_name, e)
+    finally:
+        try:
+            driver.quit()
+        except Exception:
+            pass
+
+        try:
+            if os.path.exists(download_dir):
+                for file in os.listdir(download_dir):
+                    if file.endswith(".xlsx"):
+                        shutil.move(
+                            os.path.join(download_dir, file),
+                            os.path.join(FINAL_DIR, file),
+                        )
+                shutil.rmtree(download_dir)
+        except Exception as e:
+            logger.warning("Rescrape temp cleanup failed for %s: %s", state_name, e)
+
+
+def rescrape_missing_files(missing_filenames, logger):
+    """One pass: re-download only missing RTO files, grouped by state."""
+    targets = missing_to_rescrape_targets(missing_filenames)
+    if not targets:
+        logger.warning("No rescrape targets parsed from missing file list")
+        return
+
+    by_state = group_targets_by_state(targets)
+    logger.info(
+        "Missing-file rescrape: %s file(s) across %s state(s)",
+        len(targets),
+        len(by_state),
+    )
+
+    for state_name, state_targets in by_state.items():
+        state_xpath = STATES.get(state_name)
+        if not state_xpath:
+            logger.error("Unknown state for rescrape targets: %s", state_name)
+            continue
+        rescrape_targets_for_state(state_name, state_xpath, state_targets, logger)
 
 
 def is_crashed(driver):
@@ -544,6 +713,24 @@ def main():
         INPUT_FOLDER = FINAL_DIR
         OUTPUT_CSV = f"cumulative_folder/{date.today().strftime('%Y-%m-%d')}.csv"
         run_rename_check(INPUT_FOLDER)
+
+        missing = run_file_check(INPUT_FOLDER, raise_on_missing=False)
+        for attempt in range(1, MAX_MISSING_RESCRAPE_PASSES + 1):
+            if not missing:
+                break
+            logger.warning(
+                "%s file(s) missing — rescrape pass %s/%s",
+                len(missing),
+                attempt,
+                MAX_MISSING_RESCRAPE_PASSES,
+            )
+            rescrape_missing_files(missing, logger)
+            run_rename_check(INPUT_FOLDER)
+            missing = run_file_check(INPUT_FOLDER, raise_on_missing=False)
+
+        if missing:
+            run_file_check(INPUT_FOLDER, raise_on_missing=True)
+
         consolidate_rto_files(INPUT_FOLDER, OUTPUT_CSV)
         delta_main()
         logger.info("✅ Post-processing completed successfully")

@@ -1,12 +1,16 @@
 import argparse
+from datetime import date, timedelta
 from pathlib import Path
 
 import pandas as pd
 
 
-DEFAULT_LEFT = "mockfiltersV1.csv"
-DEFAULT_RIGHT = "mockfilters.csv"
-DEFAULT_OUTPUT = "fillers.csv"
+_HERE = Path(__file__).resolve().parent
+_ROOT = _HERE.parent
+DEFAULT_LEFT = str(_HERE / "mockfiltersV1.csv")
+DEFAULT_RIGHT = str(_HERE / "mockfilters.csv")
+DEFAULT_OUTPUT = str(_HERE / "fillers.csv")
+DEFAULT_MASTER = str(_ROOT / "final_master.csv")
 
 ID_COLUMNS = {
     "scrape_timestamp",
@@ -41,6 +45,16 @@ def _parse_args() -> argparse.Namespace:
         default=DEFAULT_OUTPUT,
         help="Output CSV path for the delta.",
     )
+    parser.add_argument(
+        "--append-to-master",
+        action="store_true",
+        help="Append the generated output CSV rows into final_master.csv.",
+    )
+    parser.add_argument(
+        "--master",
+        default=DEFAULT_MASTER,
+        help="Master CSV path to append into (used with --append-to-master).",
+    )
     return parser.parse_args()
 
 
@@ -71,7 +85,7 @@ def _normalize_keys(df: pd.DataFrame) -> pd.DataFrame:
     return normalized
 
 
-def create_delta(left_path: Path, right_path: Path, output_path: Path) -> None:
+def create_delta(left_path: Path, right_path: Path, output_path: Path) -> Path:
     left = pd.read_csv(left_path)
     right = pd.read_csv(right_path)
 
@@ -149,19 +163,80 @@ def create_delta(left_path: Path, right_path: Path, output_path: Path) -> None:
         if col not in delta.columns:
             delta[col] = "None"
 
-    for col in ["scrape_timestamp", "timestamp", "vehicle_type"]:
-        if col in delta.columns:
-            delta[col] = delta[col].fillna("None")
+    today_str = date.today().strftime("%d-%m-%Y")
+    yesterday_str = (date.today() - timedelta(days=1)).strftime("%d-%m-%Y")
+
+    # These fields are required by downstream reports; populate them deterministically.
+    delta["vehicle_type"] = "motor_car"
+    delta["timestamp"] = yesterday_str
+    delta["scrape_timestamp"] = today_str
 
     delta = delta[ordered_cols]
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    delta.to_csv(output_path, index=False)
-    print(f"Saved {len(delta)} rows to {output_path}")
+
+    written_path = output_path
+    try:
+        delta.to_csv(written_path, index=False)
+    except PermissionError:
+        # Common on Windows when the CSV is open in Excel/Power BI.
+        written_path = output_path.with_name(
+            f"{output_path.stem}_generated{output_path.suffix}"
+        )
+        delta.to_csv(written_path, index=False)
+        print(
+            f"Could not write to {output_path} (file is locked). "
+            f"Wrote output to {written_path} instead."
+        )
+
+    print(f"Saved {len(delta)} rows to {written_path}")
+    return written_path
+
+
+def append_csv(source_csv: Path, master_csv: Path) -> None:
+    print(f"[append] source_csv: {source_csv}")
+    print(f"[append] master_csv: {master_csv}")
+
+    source = pd.read_csv(source_csv, low_memory=False)
+    print(f"[append] source rows: {len(source)} | source cols: {len(source.columns)}")
+
+    if master_csv.exists():
+        master = pd.read_csv(master_csv, low_memory=False)
+        print(f"[append] master exists: yes | master rows: {len(master)}")
+    else:
+        master = pd.DataFrame(columns=source.columns)
+        print("[append] master exists: no | master rows: 0 (will create)")
+
+    # Align columns (even if order differs) and preserve any extra columns.
+    all_cols = list(dict.fromkeys(list(master.columns) + list(source.columns)))
+    master = master.reindex(columns=all_cols)
+    source = source.reindex(columns=all_cols)
+    print(f"[append] aligned cols: {len(all_cols)}")
+
+    combined = pd.concat([master, source], ignore_index=True)
+    master_csv.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        combined.to_csv(master_csv, index=False)
+        print("[append] status: SUCCESS")
+        print(f"[append] rows appended: {len(source)}")
+        print(f"[append] total rows after append: {len(combined)}")
+        print(f"[append] written to: {master_csv}")
+        return
+    except PermissionError:
+        # Common on Windows when the CSV is open in Excel/Power BI.
+        fallback = master_csv.with_name(f"{master_csv.stem}_appended{master_csv.suffix}")
+        combined.to_csv(fallback, index=False)
+        print("[append] status: FALLBACK (master file locked)")
+        print(f"[append] rows appended: {len(source)}")
+        print(f"[append] total rows after append: {len(combined)}")
+        print(f"[append] written to: {fallback}")
 
 
 def main() -> None:
     args = _parse_args()
-    create_delta(Path(args.left), Path(args.right), Path(args.output))
+    output_written = create_delta(Path(args.left), Path(args.right), Path(args.output))
+
+    if args.append_to_master:
+        append_csv(output_written, Path(args.master))
 
 
 if __name__ == "__main__":

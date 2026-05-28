@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 from datetime import datetime
 
+
 # --- FOLDERS / FILES ---
 CUMULATIVE_DIR = Path("cumulative_folder")   
 DELTA_OUT_DIR  = Path("delta_folder")       
@@ -198,8 +199,20 @@ def main():
 
     drop_today_rows(FINAL_FILE)
     append_to_final(FINAL_FILE, out_df)
-    preprocess_master()
-    upload_and_email(delta_csv_path=out_file,cumulative_csv_path=new_path,master_csv_path=PREPROCESS_MASTER_FILE, recipient_email ="sanjeevan@axtr.in,rauf@axtr.in,sanjeevanmanoranjan@gmail.com,alphaf.qcl@tatamotors.com,karthik.krishnan@tatamotors.com")
+
+    # Build preprocessed outputs and attach the smaller month-to-date Excel
+    pre = preprocess_master()
+    master_to_send = pre.get("mtd_excel") or PREPROCESS_MASTER_FILE
+
+    upload_and_email(
+        delta_csv_path=out_file,
+        cumulative_csv_path=new_path,
+        monthwise_path=master_to_send,
+        full_master_path=PREPROCESS_MASTER_FILE,
+        recipient_email="sanjeevan@axtr.in,rauf@axtr.in,sanjeevanmanoranjan@gmail.com,alphaf.qcl@tatamotors.com,karthik.krishnan@tatamotors.com,hitendra@slokaadvertising.com",
+        #recipient_email="sanjeevan@axtr.in",
+        
+)
     
 
 if __name__ == "__main__":

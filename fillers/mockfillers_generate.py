@@ -5,8 +5,8 @@ from pathlib import Path
 import pandas as pd
 
 
-DEFAULT_INPUT = r"C:\\Users\\sanje_3wfdh8z\\OneDrive\\Desktop\\Pari\\cumulative_folder\\2026-03-27.csv"
-DEFAULT_OUTPUT = "mockfiltersV1.csv"
+DEFAULT_OUTPUT_V1 = "mockfiltersV1.csv"
+DEFAULT_OUTPUT_MASTER = "mockfilters.csv"
 
 ID_COLUMNS = {
     "scrape_timestamp",
@@ -22,19 +22,76 @@ ID_COLUMNS = {
 }
 
 
+def _repo_root() -> Path:
+    # fillers/mockfillers_generate.py -> repo root is one level above fillers/
+    return Path(__file__).resolve().parents[1]
+
+
+def _find_latest_dated_csv(folder: Path) -> Path:
+    """
+    Prefer files named YYYY-MM-DD.csv. If none match, fall back to newest *.csv by mtime.
+    """
+    folder = folder.resolve()
+    candidates = [p for p in folder.glob("*.csv") if p.is_file()]
+    if not candidates:
+        raise FileNotFoundError(f"No .csv files found in: {folder}")
+
+    dated: list[tuple[datetime, Path]] = []
+    for p in candidates:
+        try:
+            d = datetime.strptime(p.stem, "%Y-%m-%d")
+        except ValueError:
+            continue
+        dated.append((d, p))
+
+    if dated:
+        return max(dated, key=lambda t: t[0])[1]
+
+    return max(candidates, key=lambda p: p.stat().st_mtime)
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Create per-RTO and maker monthly summaries."
     )
     parser.add_argument(
+        "--mode",
+        choices=["auto", "single"],
+        default="auto",
+        help=(
+            "auto: generate both outputs automatically (latest cumulative -> mockfiltersV1, "
+            "final_master -> mockfilters). single: generate one output from --input/--output."
+        ),
+    )
+    parser.add_argument(
         "--input",
-        default=DEFAULT_INPUT,
-        help="Input CSV path.",
+        default=None,
+        help="(single mode) Input CSV path.",
     )
     parser.add_argument(
         "--output",
-        default=DEFAULT_OUTPUT,
-        help="Output CSV path for grouped results.",
+        default=None,
+        help="(single mode) Output CSV path for grouped results.",
+    )
+    parser.add_argument(
+        "--cumulative-folder",
+        default=None,
+        help="(auto mode) Folder containing dated cumulative CSVs.",
+    )
+    parser.add_argument(
+        "--final-master",
+        default=None,
+        help="(auto mode) Path to final_master.csv.",
+    )
+    parser.add_argument(
+        "--output-v1",
+        default=None,
+        help="(auto mode) Output path for mockfiltersV1.csv.",
+    )
+    parser.add_argument(
+        "--output-master",
+        default=None,
+        help="(auto mode) Output path for mockfilters.csv.",
     )
     parser.add_argument(
         "--month",
@@ -113,12 +170,33 @@ def create_monthly_rto_maker_csv(
 
 def main() -> None:
     args = _parse_args()
-    create_monthly_rto_maker_csv(
-        Path(args.input),
-        Path(args.output),
-        args.month,
-        args.year,
-    )
+
+    root = _repo_root()
+
+    if args.mode == "single":
+        if not args.input or not args.output:
+            raise ValueError("In single mode, both --input and --output are required.")
+        create_monthly_rto_maker_csv(
+            Path(args.input),
+            Path(args.output),
+            args.month,
+            args.year,
+        )
+        return
+
+    cumulative_folder = Path(args.cumulative_folder) if args.cumulative_folder else (root / "cumulative_folder")
+    final_master = Path(args.final_master) if args.final_master else (root / "final_master.csv")
+
+    output_v1 = Path(args.output_v1) if args.output_v1 else (root / "fillers" / DEFAULT_OUTPUT_V1)
+    output_master = Path(args.output_master) if args.output_master else (root / "fillers" / DEFAULT_OUTPUT_MASTER)
+
+    latest_cumulative = _find_latest_dated_csv(cumulative_folder)
+
+    # Run 1: latest cumulative -> fillers/mockfiltersV1.csv
+    create_monthly_rto_maker_csv(latest_cumulative, output_v1, args.month, args.year)
+
+    # Run 2: final_master.csv -> fillers/mockfilters.csv
+    create_monthly_rto_maker_csv(final_master, output_master, args.month, args.year)
 
 
 if __name__ == "__main__":

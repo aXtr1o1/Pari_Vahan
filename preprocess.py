@@ -1,4 +1,6 @@
 import pandas as pd
+from datetime import datetime, timedelta
+from pathlib import Path
 
 city_mapping = {
     "THIRUBUVANAI(VILLIANUR)":"Pondicherry",
@@ -972,6 +974,7 @@ FUEL_GROUP_MAP = {
 
     "Petrol": [
         "PETROL",
+        "PETROL(E20)",
         "PETROL/ETHANOL"
     ],
 
@@ -1116,10 +1119,55 @@ def preprocess_master():
     grouped["month"] = grouped["Date"].dt.strftime("%B")
     grouped["Qtr"] = grouped["Date"].apply(get_financial_quarter)
 
-    grouped.to_csv("master_preprocessed.csv", index=False)
+    # Export with date-only (no time component)
+    grouped_export = grouped.copy()
+    grouped_export["Date"] = grouped_export["Date"].dt.date
+    grouped_export.to_csv("master_preprocessed.csv", index=False)
     # grouped.to_csv("AfterTest.csv", index=False)
 
     print("Saved:", grouped.shape, "-> master_preprocessed.csv")
+
+    # -------------------------
+    # Month-to-date Excel export (smaller attachment)
+    # Range = 1st of month .. latest Date present in data
+    # -------------------------
+    try:
+        max_dt = pd.to_datetime(grouped["Date"], errors="coerce").max()
+    except Exception:
+        max_dt = None
+
+    if pd.notna(max_dt):
+        max_day = max_dt.date()
+        month_start = max_day.replace(day=1)
+
+        mtd = grouped[
+            (grouped["Date"].dt.date >= month_start) & (grouped["Date"].dt.date <= max_day)
+        ].copy()
+
+        out_dir = Path("monthwise_reports")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        # One file per month (overwritten daily as month-to-date grows)
+        mtd_filename = f"master_preprocessed_{month_start:%Y-%m}.xlsx"
+        mtd_path = out_dir / mtd_filename
+
+        # Use xlsx to keep Tata requirement; openpyxl is already in requirements.
+        mtd_export = mtd.copy()
+        mtd_export["Date"] = mtd_export["Date"].dt.date
+        mtd_export.to_excel(mtd_path, index=False)
+        print("Saved:", mtd.shape, "->", str(mtd_path))
+        return {
+            "full_csv": "master_preprocessed.csv",
+            "mtd_excel": str(mtd_path),
+            "mtd_start": month_start,
+            "mtd_end": max_day,
+        }
+
+    return {
+        "full_csv": "master_preprocessed.csv",
+        "mtd_excel": None,
+        "mtd_start": None,
+        "mtd_end": None,
+    }
 
 if __name__ == "__main__":
 
